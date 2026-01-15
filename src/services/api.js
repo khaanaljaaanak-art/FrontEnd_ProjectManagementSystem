@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://backend-projectmanagementsystem.onrender.com/api",
+  baseURL:
+    process.env.REACT_APP_API_BASE_URL ||
+    "https://backend-projectmanagementsystem.onrender.com/api",
 });
 
 api.interceptors.request.use((config) => {
