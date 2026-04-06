@@ -12,7 +12,7 @@ const AdminAssessmentsPage = () => {
   const { projects } = useProjects();
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [selectedAssessmentId, setSelectedAssessmentId] = useState("");
-  const [draft, setDraft] = useState({ title: "", deadline: "", extendedDeadline: "" });
+  const [draft, setDraft] = useState({ title: "", deadline: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -57,7 +57,7 @@ const AdminAssessmentsPage = () => {
         title: draft.title.trim(),
         deadline: draft.deadline,
       });
-      setDraft({ title: "", deadline: "", extendedDeadline: "" });
+      setDraft({ title: "", deadline: "" });
     }, "Assessment created.");
   };
 
@@ -67,7 +67,6 @@ const AdminAssessmentsPage = () => {
       await updateAssessment(selectedAssessmentId, {
         title: draft.title.trim() || undefined,
         deadline: draft.deadline || undefined,
-        extendedDeadline: draft.extendedDeadline || null,
       });
     }, "Assessment updated.");
   };
@@ -135,15 +134,6 @@ const AdminAssessmentsPage = () => {
             required
             disabled={busy || !selectedProjectId}
           />
-          <input
-            className="input"
-            type="datetime-local"
-            value={draft.extendedDeadline}
-            onChange={(e) =>
-              setDraft((prev) => ({ ...prev, extendedDeadline: e.target.value }))
-            }
-            disabled={busy || !selectedProjectId}
-          />
           <div className="actions">
             <button type="submit" className="button buttonPrimary" disabled={busy || !selectedProjectId}>
               Create
@@ -176,11 +166,6 @@ const AdminAssessmentsPage = () => {
             <li key={assessment._id} className="item">
               <p className="itemTitle">{assessment.title}</p>
               <p className="itemMeta">Deadline: {new Date(assessment.deadline).toLocaleString()}</p>
-              {assessment.extendedDeadline && (
-                <p className="itemMeta">
-                  Extended: {new Date(assessment.extendedDeadline).toLocaleString()}
-                </p>
-              )}
               <button
                 type="button"
                 className="button"
@@ -190,9 +175,6 @@ const AdminAssessmentsPage = () => {
                     title: assessment.title,
                     deadline: assessment.deadline
                       ? new Date(assessment.deadline).toISOString().slice(0, 16)
-                      : "",
-                    extendedDeadline: assessment.extendedDeadline
-                      ? new Date(assessment.extendedDeadline).toISOString().slice(0, 16)
                       : "",
                   });
                 }}
