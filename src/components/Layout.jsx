@@ -25,9 +25,10 @@ const Layout = ({ title, subtitle, children }) => {
               <button
                 type="button"
                 className="button buttonDanger"
+                aria-label="Log out"
                 onClick={logout}
               >
-                Logout
+                Log out
               </button>
             )}
           </div>
