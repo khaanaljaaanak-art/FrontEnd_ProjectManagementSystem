@@ -118,7 +118,11 @@ const SupervisorHistoryPage = () => {
                         <tr key={rev._id}>
                           <td>{rev.version}</td>
                           <td>{rev.changeType}</td>
-                          <td>{rev.changedBy?.name || rev.changedRole}</td>
+                          <td>
+                            {rev.changedBy?.name
+                              ? `${rev.changedBy.name} (${rev.changedRole})`
+                              : rev.changedRole}
+                          </td>
                           <td>{rev.marks ?? "-"}</td>
                           <td>{rev.feedback || "-"}</td>
                           <td>{new Date(rev.createdAt).toLocaleString()}</td>

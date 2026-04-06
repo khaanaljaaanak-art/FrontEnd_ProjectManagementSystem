@@ -105,7 +105,7 @@ const StudentOverviewPage = () => {
                 onClick={() => onAssign(project._id)}
                 disabled={busy}
               >
-                Assign This Project
+                Select This Project
               </button>
             </li>
           ))}

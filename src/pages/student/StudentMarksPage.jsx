@@ -78,8 +78,30 @@ const StudentMarksPage = () => {
                 <p className="itemTitle">
                   {row.submission?.assessment?.title || "Assessment"} · {row.submission?.assessment?.project?.title || "Project"}
                 </p>
-                <p className="helper">Marks: {row.submission?.marks ?? "Not graded"}</p>
-                {row.submission?.feedback && <p className="itemMeta">Feedback: {row.submission.feedback}</p>}
+                {Array.isArray(row.submission?.grades) && row.submission.grades.length > 0 ? (
+                  <div style={{ marginTop: 8 }}>
+                    <p className="helper">Evaluator Marks</p>
+                    <ul className="list">
+                      {row.submission.grades.map((grade, index) => (
+                        <li
+                          key={`${grade.evaluator?._id || grade.evaluator || "grade"}-${index}`}
+                          className="item"
+                        >
+                          <p className="itemTitle">
+                            {grade.evaluator?.name || "Supervisor"} ({grade.evaluatorRole || "supervisor"})
+                          </p>
+                          <p className="helper">Marks: {grade.marks ?? "-"}</p>
+                          {grade.feedback && <p className="itemMeta">Feedback: {grade.feedback}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="helper">Marks: {row.submission?.marks ?? "Not graded"}</p>
+                    {row.submission?.feedback && <p className="itemMeta">Feedback: {row.submission.feedback}</p>}
+                  </div>
+                )}
                 {row.rubric && (
                   <div style={{ marginTop: 8 }}>
                     <p className="helper">Rubric (Total: {row.rubric.totalMarks})</p>

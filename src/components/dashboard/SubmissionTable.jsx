@@ -1,4 +1,4 @@
-const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
+const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave, currentUserId }) => {
   if (!submissions || submissions.length === 0) return null;
 
   return (
@@ -20,6 +20,12 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
               feedback: s.feedback ?? "",
             };
 
+            const grades = Array.isArray(s.grades) ? s.grades : [];
+            const myGrade = grades.find(
+              (grade) => String(grade.evaluator?._id || grade.evaluator) === String(currentUserId)
+            );
+            const alreadyGradedByMe = Boolean(myGrade);
+
             return (
               <tr key={s._id}>
                 <td>
@@ -29,6 +35,15 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
                   </div>
                 </td>
                 <td>
+                  {grades.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      {grades.map((grade, idx) => (
+                        <div key={`${grade.evaluator?._id || grade.evaluator}-${idx}`} className="helper" style={{ margin: 0 }}>
+                          {grade.evaluator?.name || "Supervisor"} ({grade.evaluatorRole}): {grade.marks}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {(() => {
                     const urls =
                       Array.isArray(s.fileUrls) && s.fileUrls.length > 0
@@ -62,6 +77,7 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
                     value={draft.marks}
                     onChange={(e) => onChangeDraft(s._id, { ...draft, marks: e.target.value })}
                     placeholder="e.g. 85"
+                    disabled={alreadyGradedByMe}
                   />
                 </td>
                 <td style={{ minWidth: 240 }}>
@@ -72,6 +88,7 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
                       onChangeDraft(s._id, { ...draft, feedback: e.target.value })
                     }
                     placeholder="Short feedback"
+                    disabled={alreadyGradedByMe}
                   />
                 </td>
                 <td style={{ whiteSpace: "nowrap" }}>
@@ -79,8 +96,9 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave }) => {
                     type="button"
                     className="button buttonPrimary"
                     onClick={() => onSave(s._id)}
+                    disabled={alreadyGradedByMe}
                   >
-                    Save
+                    {alreadyGradedByMe ? "Updated" : "Save"}
                   </button>
                 </td>
               </tr>

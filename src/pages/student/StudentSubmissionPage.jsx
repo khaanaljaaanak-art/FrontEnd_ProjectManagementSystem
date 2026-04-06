@@ -96,9 +96,14 @@ const StudentSubmissionPage = () => {
   } = useMySubmission(state.selectedAssessmentId);
 
   const effectiveDeadline = selectedAssessment?.extendedDeadline || selectedAssessment?.deadline;
+  const hasAnyGrade =
+    Boolean(mySubmission?.marks !== null && mySubmission?.marks !== undefined) ||
+    (Array.isArray(mySubmission?.grades) && mySubmission.grades.length > 0) ||
+    mySubmission?.status === "graded";
   const canResubmit =
     Boolean(mySubmission) &&
     Boolean(effectiveDeadline) &&
+    !hasAnyGrade &&
     Date.now() <= new Date(effectiveDeadline).getTime();
 
   const onSubmit = async (e) => {
@@ -196,9 +201,11 @@ const StudentSubmissionPage = () => {
             </p>
             <p className="helper">Attempts: {mySubmission.attemptCount || 1}</p>
             <p className="helper">Status: {mySubmission.status || "submitted"}</p>
-            {!canResubmit && (
+            {hasAnyGrade ? (
+              <p className="helper">Resubmission closed because grading has already been submitted.</p>
+            ) : !canResubmit ? (
               <p className="helper">Deadline passed or unavailable. Resubmission closed.</p>
-            )}
+            ) : null}
           </div>
         )}
 

@@ -19,6 +19,17 @@ const SupervisorGradingPage = () => {
   const [message, setMessage] = useState("");
   const [rubric, setRubric] = useState(null);
 
+  const currentUserId = useMemo(() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return "";
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload?.id || "";
+    } catch (_e) {
+      return "";
+    }
+  }, []);
+
   const selectedProject = useMemo(
     () => projects.find((project) => project._id === selectedProjectId) || null,
     [projects, selectedProjectId]
@@ -76,7 +87,8 @@ const SupervisorGradingPage = () => {
       setMessage("Assessment evaluation saved.");
       await refreshSubmissions();
     } catch (_e) {
-      setError("Failed to save evaluation.");
+      const apiMessage = _e?.response?.data?.message;
+      setError(apiMessage || "Failed to save evaluation.");
     } finally {
       setBusy(false);
     }
@@ -161,6 +173,7 @@ const SupervisorGradingPage = () => {
         <SubmissionTable
           submissions={submissions}
           grading={grading}
+          currentUserId={currentUserId}
           onChangeDraft={(submissionId, value) =>
             setGrading((prev) => ({ ...prev, [submissionId]: value }))
           }
