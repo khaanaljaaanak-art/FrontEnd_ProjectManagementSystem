@@ -10,6 +10,7 @@ import ErrorMessage from "../../components/common/ErrorMessage";
 
 const AdminProjectsPage = () => {
   const { projects, refreshProjects } = useProjects();
+  const [selectedProjectIds, setSelectedProjectIds] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -24,6 +25,10 @@ const AdminProjectsPage = () => {
       await fn();
       if (successMessage) setMessage(successMessage);
       await refreshProjects();
+
+      setSelectedProjectIds((prev) =>
+        prev.filter((id) => projects.some((project) => project._id === id))
+      );
     } catch (e) {
       setError(e?.response?.data?.message || "Action failed.");
     } finally {
@@ -51,6 +56,48 @@ const AdminProjectsPage = () => {
         status: draft.status,
       });
     }, "Project updated.");
+  };
+
+  const toggleSelection = (projectId) => {
+    setSelectedProjectIds((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId]
+    );
+  };
+
+  const allSelected = projects.length > 0 && selectedProjectIds.length === projects.length;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedProjectIds([]);
+      return;
+    }
+    setSelectedProjectIds(projects.map((project) => project._id));
+  };
+
+  const onDeleteSelected = async () => {
+    if (selectedProjectIds.length === 0) return;
+
+    const selectedCount = selectedProjectIds.length;
+    await withAction(async () => {
+      const results = await Promise.allSettled(
+        selectedProjectIds.map((projectId) => deleteProject(projectId))
+      );
+
+      if (selectedProjectIds.includes(selectedProjectId)) {
+        setSelectedProjectId("");
+      }
+      setSelectedProjectIds([]);
+
+      const failed = results.filter((result) => result.status === "rejected");
+      if (failed.length > 0) {
+        const firstError = failed[0].reason;
+        const reason =
+          firstError?.response?.data?.message || firstError?.message || "Unknown error.";
+        throw new Error(`${failed.length}/${results.length} deletions failed. ${reason}`);
+      }
+    }, `${selectedCount} project(s) deleted.`);
   };
 
   return (
@@ -97,12 +144,43 @@ const AdminProjectsPage = () => {
         </div>
       </form>
 
+      <div className="actions" style={{ marginTop: 12 }}>
+        <label className="helper" style={{ margin: 0, display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleSelectAll}
+            disabled={busy || projects.length === 0}
+          />
+          Select all
+        </label>
+        <button
+          type="button"
+          className="button buttonDanger"
+          onClick={onDeleteSelected}
+          disabled={busy || selectedProjectIds.length === 0}
+        >
+          Delete Selected ({selectedProjectIds.length})
+        </button>
+      </div>
+
       <ul className="list" style={{ marginTop: 12 }}>
         {projects.map((project) => (
           <li key={project._id} className="item">
-            <p className="itemTitle">{project.title}</p>
-            <p className="itemMeta">{project.description}</p>
-            <p className="helper">Approval: {project.approved ? "Approved" : "Pending"}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input
+                type="checkbox"
+                checked={selectedProjectIds.includes(project._id)}
+                onChange={() => toggleSelection(project._id)}
+                disabled={busy}
+                aria-label={`Select ${project.title}`}
+              />
+              <div>
+                <p className="itemTitle">{project.title}</p>
+                <p className="itemMeta">{project.description}</p>
+                <p className="helper">Approval: {project.approved ? "Approved" : "Pending"}</p>
+              </div>
+            </div>
             <div className="actions">
               <button
                 type="button"

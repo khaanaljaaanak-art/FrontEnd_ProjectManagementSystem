@@ -200,30 +200,36 @@ const AdminUsersPage = () => {
               </div>
             </div>
             <div className="actions">
-              <button
-                type="button"
-                className="button"
-                onClick={() => withAction(() => updateUser(user._id, { role: "student" }), "Role updated.")}
-                disabled={busy}
-              >
-                Set Student
-              </button>
-              <button
-                type="button"
-                className="button"
-                onClick={() => withAction(() => updateUser(user._id, { role: "supervisor" }), "Role updated.")}
-                disabled={busy}
-              >
-                Set Supervisor
-              </button>
-              <button
-                type="button"
-                className="button"
-                onClick={() => withAction(() => updateUser(user._id, { role: "admin" }), "Role updated.")}
-                disabled={busy}
-              >
-                Set Admin
-              </button>
+              {user.role !== "student" && (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => withAction(() => updateUser(user._id, { role: "student" }), "Role updated.")}
+                  disabled={busy}
+                >
+                  Set Student
+                </button>
+              )}
+              {user.role !== "supervisor" && (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => withAction(() => updateUser(user._id, { role: "supervisor" }), "Role updated.")}
+                  disabled={busy}
+                >
+                  Set Supervisor
+                </button>
+              )}
+              {user.role !== "admin" && (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => withAction(() => updateUser(user._id, { role: "admin" }), "Role updated.")}
+                  disabled={busy}
+                >
+                  Set Admin
+                </button>
+              )}
               <button
                 type="button"
                 className="button buttonDanger"
