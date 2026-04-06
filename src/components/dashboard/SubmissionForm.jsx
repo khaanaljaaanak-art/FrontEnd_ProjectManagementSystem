@@ -14,6 +14,7 @@ const SubmissionForm = ({
   onSubmit,
   submitting,
   alreadySubmitted,
+  allowResubmit = false,
 }) => {
   const deadlinePassed = isPastDeadline(selectedAssessment);
 
@@ -26,7 +27,7 @@ const SubmissionForm = ({
     submitting ||
     !selectedProject?._id ||
     !selectedAssessmentId ||
-    alreadySubmitted ||
+    (alreadySubmitted && !allowResubmit) ||
     deadlinePassed ||
     tooManyFiles ||
     (!hasUrl && !hasFiles);
@@ -35,7 +36,7 @@ const SubmissionForm = ({
   if (!selectedProject?._id) disabledReason = "Select a project to continue.";
   else if (!selectedAssessmentId) disabledReason = "Select an assessment to submit.";
   else if (deadlinePassed) disabledReason = "Deadline has passed. Submissions are closed.";
-  else if (alreadySubmitted) disabledReason = "You have already submitted for this assessment.";
+  else if (alreadySubmitted && !allowResubmit) disabledReason = "You have already submitted for this assessment.";
 
   return (
     <form onSubmit={onSubmit}>
@@ -48,7 +49,7 @@ const SubmissionForm = ({
             placeholder="https://..."
             value={fileUrl}
             onChange={(e) => onChangeFileUrl(e.target.value)}
-            disabled={submitting || alreadySubmitted || deadlinePassed}
+            disabled={submitting || (alreadySubmitted && !allowResubmit) || deadlinePassed}
           />
           <p className="helper" style={{ marginTop: 8 }}>
             Or upload up to 3 files below.
@@ -60,7 +61,7 @@ const SubmissionForm = ({
             type="file"
             multiple
             onChange={(e) => onChangeFiles(e.target.files)}
-            disabled={submitting || alreadySubmitted || deadlinePassed}
+            disabled={submitting || (alreadySubmitted && !allowResubmit) || deadlinePassed}
           />
 
           {filesCount > 0 && (
@@ -80,7 +81,7 @@ const SubmissionForm = ({
           className="button buttonPrimary"
           disabled={submitDisabled}
         >
-          {submitting ? "Submitting…" : "Submit"}
+          {submitting ? "Submitting…" : alreadySubmitted && allowResubmit ? "Resubmit" : "Submit"}
         </button>
       </div>
     </form>

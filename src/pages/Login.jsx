@@ -19,9 +19,9 @@ const Login = () => {
 
       login(res.data.token, res.data.role);
 
-      if (res.data.role === "admin") navigate("/admin");
-      if (res.data.role === "supervisor") navigate("/supervisor");
-      if (res.data.role === "student") navigate("/student");
+      if (res.data.role === "admin") navigate("/admin/projects");
+      if (res.data.role === "supervisor") navigate("/supervisor/grading");
+      if (res.data.role === "student") navigate("/student/overview");
 
     } catch (err) {
       setError("Invalid credentials");

@@ -102,10 +102,9 @@ const Signup = () => {
                 >
                   <option value="student">Student</option>
                   <option value="supervisor">Supervisor</option>
-                  <option value="admin">Admin</option>
                 </select>
                 <p className="helper">
-                  For production, role assignment should be restricted.
+                  Admin accounts are created and managed from the admin panel.
                 </p>
               </div>
             </div>

@@ -18,3 +18,13 @@ export const fetchAssessmentsByProject = async (projectId) => {
   const response = await api.get(`/assessments/${projectId}`);
   return response.data;
 };
+
+export const updateAssessment = async (assessmentId, payload) => {
+  const response = await api.put(`/assessments/item/${assessmentId}`, payload);
+  return response.data;
+};
+
+export const deleteAssessment = async (assessmentId) => {
+  const response = await api.delete(`/assessments/item/${assessmentId}`);
+  return response.data;
+};

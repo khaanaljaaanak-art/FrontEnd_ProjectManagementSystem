@@ -1,16 +1,19 @@
 :root {
-  /* Light theme (plain white background) */
-  --bg: #ffffff;
-  --surface: rgba(11, 18, 32, 0.04);
-  --surface-2: rgba(11, 18, 32, 0.06);
-  --border: rgba(11, 18, 32, 0.14);
-  --text: rgba(11, 18, 32, 0.92);
-  --muted: rgba(11, 18, 32, 0.70);
-  --danger: #c92a2a;
-  --focus: rgba(116, 192, 252, 0.45);
+  /* Aurora Citrus theme */
+  --bg: #141b26;
+  --surface: rgba(20, 28, 40, 0.84);
+  --surface-2: rgba(16, 24, 36, 0.92);
+  --border: rgba(162, 187, 216, 0.28);
+  --text: #e9f2fb;
+  --muted: rgba(223, 237, 250, 0.72);
+  --danger: #c4362e;
+  --focus: rgba(25, 163, 145, 0.42);
+  --accent: #f38b2a;
+  --accent-2: #19a391;
+  --accent-soft: rgba(243, 139, 42, 0.2);
 
   --radius: 14px;
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --shadow: 0 18px 36px rgba(0, 0, 0, 0.38);
   --container: 1060px;
 
   /* Helps browsers render native controls (select dropdowns, scrollbars) in light mode */
@@ -50,7 +53,10 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
     Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 10% 8%, rgba(25, 163, 145, 0.24) 0%, rgba(25, 163, 145, 0) 30%),
+    radial-gradient(circle at 88% 14%, rgba(243, 139, 42, 0.28) 0%, rgba(243, 139, 42, 0) 35%),
+    linear-gradient(165deg, #111824 0%, #16202f 45%, #182536 100%);
   color: var(--text);
 }
 
@@ -66,7 +72,7 @@ a {
 
 .footer {
   border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(16, 24, 36, 0.86);
   backdrop-filter: blur(10px);
   flex-shrink: 0;
 }
@@ -82,7 +88,9 @@ a {
   top: 0;
   z-index: 10;
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.86);
+  background:
+    linear-gradient(90deg, rgba(17, 25, 37, 0.9), rgba(17, 25, 37, 0.82)),
+    linear-gradient(115deg, rgba(243, 139, 42, 0.28), rgba(25, 163, 145, 0.26));
   border-bottom: 1px solid var(--border);
 }
 
@@ -106,7 +114,7 @@ a {
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(233, 242, 251, 0.78);
 }
 
 .brandSubtitle {
@@ -124,7 +132,7 @@ a {
   font-size: 12px;
   padding: 6px 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: rgba(19, 28, 41, 0.8);
   border-radius: 999px;
   color: var(--muted);
 }
@@ -202,7 +210,11 @@ a {
 }
 
 .card {
-  background: var(--surface);
+  background: linear-gradient(
+    160deg,
+    rgba(24, 34, 48, 0.9),
+    rgba(18, 27, 39, 0.86)
+  );
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -305,16 +317,16 @@ a {
 }
 
 .button:hover {
-  background: rgba(11, 18, 32, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .buttonPrimary {
-  background: rgba(116, 192, 252, 0.22);
-  border-color: rgba(116, 192, 252, 0.30);
+  background: linear-gradient(120deg, rgba(243, 139, 42, 0.28), rgba(25, 163, 145, 0.22));
+  border-color: rgba(243, 139, 42, 0.42);
 }
 
 .buttonPrimary:hover {
-  background: rgba(116, 192, 252, 0.28);
+  background: linear-gradient(120deg, rgba(243, 139, 42, 0.36), rgba(25, 163, 145, 0.3));
 }
 
 .buttonDanger {
@@ -440,4 +452,48 @@ a {
 
 .table tr:last-child td {
   border-bottom: none;
+}
+
+.dashboardNav {
+  border: 1px solid var(--border);
+  background: linear-gradient(150deg, rgba(23, 33, 47, 0.92), rgba(16, 24, 36, 0.88));
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.dashboardNavLinks {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dashboardNavLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.dashboardNavLink:hover {
+  background: rgba(11, 18, 32, 0.06);
+}
+
+.dashboardNavLink.active {
+  background: linear-gradient(120deg, rgba(243, 139, 42, 0.28), rgba(25, 163, 145, 0.22));
+  border-color: rgba(243, 139, 42, 0.42);
+}
+
+.dashboardNavControls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
