@@ -1,12 +1,15 @@
 import { useAuth } from "../context/AuthContext";
 
-const roleLabel = (role) => {
-  if (!role) return "Guest";
-  return role.charAt(0).toUpperCase() + role.slice(1);
+const portalLabel = (role) => {
+  if (role === "admin") return "Admin Portal";
+  if (role === "student") return "Student Portal";
+  if (role === "supervisor") return "Supervisor Portal";
+  return "Assessment Portal";
 };
 
 const Layout = ({ title, subtitle, children }) => {
   const { token, role, logout } = useAuth();
+  const activePortalLabel = token ? portalLabel(role) : "Assessment Portal";
 
   return (
     <div className="appShell">
@@ -14,11 +17,10 @@ const Layout = ({ title, subtitle, children }) => {
         <div className="headerInner">
           <div className="brand">
             <div className="brandTitle">Project Management System</div>
-            <div className="brandSubtitle">Assessment Portal</div>
+            <div className="brandSubtitle">{activePortalLabel}</div>
           </div>
 
           <div className="headerRight">
-            <span className="badge">Role: {token ? roleLabel(role) : ""}</span>
             {token && (
               <button
                 type="button"
@@ -46,7 +48,7 @@ const Layout = ({ title, subtitle, children }) => {
       <footer className="footer">
         <div className="footerInner">
           <span className="helper" style={{ margin: 0 }}>
-            Project Management System · Assessment Portal
+            Project Management System · {activePortalLabel}
           </span>
         </div>
       </footer>
