@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import {
   fetchAssignedStudentsProgress,
@@ -8,6 +8,28 @@ import {
   sendMessageToStudent,
 } from "../../services/supervisorService";
 
+const formatNotificationKind = (type) => {
+  if (!type || typeof type !== "string") return "Update";
+  const normalized = type.trim().toLowerCase();
+  const map = {
+    message: "Message",
+    feedback_update: "Evaluation",
+    submission: "Submission",
+    system: "System",
+  };
+  if (map[normalized]) return map[normalized];
+  return normalized
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+};
+
+const typeSlug = (type) => {
+  if (!type || typeof type !== "string") return "default";
+  return type.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "default";
+};
+
 const SupervisorCommunicationPage = () => {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -15,8 +37,20 @@ const SupervisorCommunicationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [threadLoading, setThreadLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const myUserId = useMemo(() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return "";
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload?.id || "";
+    } catch (_e) {
+      return "";
+    }
+  }, []);
 
   const loadBase = useCallback(async () => {
     setLoading(true);
@@ -26,13 +60,13 @@ const SupervisorCommunicationPage = () => {
         fetchAssignedStudentsProgress(),
         fetchSupervisorNotifications(),
       ]);
-      const onlyStudents = (Array.isArray(studentsProgress) ? studentsProgress : []).map(
-        (row) => row.student
-      );
+      const onlyStudents = (Array.isArray(studentsProgress) ? studentsProgress : []).map((row) => row.student);
       setStudents(onlyStudents);
       setNotifications(Array.isArray(notices) ? notices : []);
       if (onlyStudents.length > 0) {
         setSelectedStudentId((prev) => prev || onlyStudents[0]._id);
+      } else {
+        setSelectedStudentId("");
       }
     } catch (_e) {
       setError("Failed to load communication workspace.");
@@ -44,8 +78,10 @@ const SupervisorCommunicationPage = () => {
   const loadConversation = useCallback(async (studentId) => {
     if (!studentId) {
       setConversation([]);
+      setThreadLoading(false);
       return;
     }
+    setThreadLoading(true);
     setError("");
     try {
       const data = await fetchConversation(studentId);
@@ -53,6 +89,8 @@ const SupervisorCommunicationPage = () => {
     } catch (_e) {
       setConversation([]);
       setError("Failed to load conversation.");
+    } finally {
+      setThreadLoading(false);
     }
   }, []);
 
@@ -93,57 +131,108 @@ const SupervisorCommunicationPage = () => {
   };
 
   return (
-    <div className="grid grid2">
-      <div className="card">
-        <div className="cardHeader">
+    <>
+      <ErrorMessage message={error} />
+
+      <div className="grid grid2 supervisorCommunicationGrid">
+        <section className="card studentOverviewCard studentNotifyPage" aria-labelledby="sup-notify-heading">
+        <header className="studentOverviewCard__header studentOverviewCard__header--split">
           <div>
-            <p className="cardTitle">Supervisor Notifications</p>
-            <p className="cardHint">Get alerted when students submit new work</p>
+            <p className="studentOverviewCard__eyebrow">Inbox</p>
+            <h2 id="sup-notify-heading" className="cardTitle">
+              Notifications
+            </h2>
+            <p className="cardHint">Alerts when students submit work or when the system posts an update.</p>
           </div>
-          <button type="button" className="button" onClick={loadBase} disabled={loading}>
-            Refresh
+          <button type="button" className="button buttonRefresh" onClick={loadBase} disabled={loading}>
+            Refresh list
           </button>
+        </header>
+
+        <div className="studentOverviewCard__body">
+          {loading ? (
+            <p className="studentOverviewStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading notifications…
+            </p>
+          ) : null}
+
+          {!loading && notifications.length === 0 ? (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No notifications</p>
+              <p className="studentOverviewEmpty__text">You are caught up. New submission alerts will land here.</p>
+            </div>
+          ) : null}
+
+          {!loading && notifications.length > 0 ? (
+            <ul className="studentNotifyList">
+              {notifications.map((notification) => {
+                const slug = typeSlug(notification.type);
+                const created = notification.createdAt ? new Date(notification.createdAt) : null;
+                const iso = created && !Number.isNaN(created.getTime()) ? created.toISOString() : undefined;
+                const label = created && !Number.isNaN(created.getTime()) ? created.toLocaleString() : "—";
+
+                return (
+                  <li
+                    key={notification._id}
+                    className={`studentNotifyItem ${notification.isRead ? "" : "studentNotifyItem--unread"}`}
+                  >
+                    <div className="studentNotifyItem__shell">
+                      <div className="studentNotifyItem__main">
+                        <div className="studentNotifyItem__head">
+                          <h3 className="studentNotifyItem__title">{notification.title}</h3>
+                          <time className="studentNotifyItem__when" dateTime={iso}>
+                            {label}
+                          </time>
+                        </div>
+                        <div className="studentNotifyItem__chips" aria-label="Notification category">
+                          <span className={`studentNotifyType studentNotifyType--${slug}`}>
+                            {formatNotificationKind(notification.type)}
+                          </span>
+                          {!notification.isRead ? <span className="studentNotifyUnreadBadge">Unread</span> : null}
+                        </div>
+                        {notification.message ? (
+                          <p className="studentNotifyItem__body">{notification.message}</p>
+                        ) : null}
+                      </div>
+                      {!notification.isRead ? (
+                        <div className="studentNotifyItem__actions">
+                          <button
+                            type="button"
+                            className="button buttonNotifyRead"
+                            onClick={() => markRead(notification._id)}
+                          >
+                            Mark as read
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
         </div>
+        </section>
 
-        <ErrorMessage message={error} />
-        {loading && <p className="helper">Loading notifications…</p>}
-
-        {!loading && notifications.length === 0 && (
-          <p className="helper">No notifications yet.</p>
-        )}
-
-        <ul className="list">
-          {notifications.map((notification) => (
-            <li key={notification._id} className="item">
-              <p className="itemTitle">{notification.title}</p>
-              <p className="itemMeta">{notification.message}</p>
-              <p className="helper">{new Date(notification.createdAt).toLocaleString()}</p>
-              {!notification.isRead && (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => markRead(notification._id)}
-                >
-                  Mark as Read
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="card">
-        <div className="cardHeader">
+        <section className="card studentOverviewCard studentCommThreadPanel" aria-labelledby="sup-comm-heading">
+        <header className="studentOverviewCard__header">
           <div>
-            <p className="cardTitle">Student Communication</p>
-            <p className="cardHint">Share guidance and feedback directly with students</p>
+            <p className="studentOverviewCard__eyebrow">Messages</p>
+            <h2 id="sup-comm-heading" className="cardTitle">
+              Student communication
+            </h2>
+            <p className="cardHint">Choose a student, review the thread, and send guidance or clarifications.</p>
           </div>
-        </div>
+        </header>
 
-        <div className="row">
-          <div>
-            <label className="label">Select Student</label>
+        <div className="studentOverviewCard__body studentCommThreadBody">
+          <div className="studentCommContactsFields">
+            <label className="label" htmlFor="sup-comm-student-select">
+              Select student
+            </label>
             <select
+              id="sup-comm-student-select"
               className="select"
               value={selectedStudentId}
               onChange={(event) => setSelectedStudentId(event.target.value)}
@@ -156,47 +245,96 @@ const SupervisorCommunicationPage = () => {
               ))}
             </select>
           </div>
-        </div>
 
-        <div className="card" style={{ marginTop: 12, padding: 12 }}>
-          <p className="cardTitle" style={{ margin: 0 }}>Conversation</p>
-          <ul className="list" style={{ marginTop: 10 }}>
-            {conversation.map((message) => (
-              <li key={message._id} className="item">
-                <p className="itemMeta" style={{ marginTop: 0 }}>
-                  {message.sender?.name || "User"} · {new Date(message.createdAt).toLocaleString()}
-                </p>
-                <p style={{ margin: 0 }}>{message.text}</p>
-              </li>
-            ))}
-          </ul>
-          {selectedStudentId && conversation.length === 0 && (
-            <p className="helper">No messages yet for this student.</p>
-          )}
-        </div>
+          {!loading && students.length === 0 ? (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No assigned students</p>
+              <p className="studentOverviewEmpty__text">
+                Students must be linked to your supervised projects before you can message them here.
+              </p>
+            </div>
+          ) : null}
 
-        <form onSubmit={onSend} style={{ marginTop: 12 }}>
-          <label className="label">Message</label>
-          <textarea
-            className="textarea"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="Write guidance or feedback"
-            required
-            disabled={busy || !selectedStudentId}
-          />
-          <div className="actions" style={{ marginTop: 10 }}>
-            <button
-              type="submit"
-              className="button buttonPrimary"
-              disabled={busy || !selectedStudentId}
-            >
-              {busy ? "Sending…" : "Send Message"}
-            </button>
-          </div>
-        </form>
+          {!loading && students.length > 0 && !selectedStudentId ? (
+            <div className="studentCommThreadPlaceholder">
+              <p className="studentCommThreadPlaceholder__title">Select a student</p>
+              <p className="studentCommThreadPlaceholder__text">Pick someone from the list above to open their thread.</p>
+            </div>
+          ) : null}
+
+          {selectedStudentId && threadLoading ? (
+            <p className="studentOverviewStatus studentCommThreadStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading messages…
+            </p>
+          ) : null}
+
+          {selectedStudentId && !threadLoading && conversation.length > 0 ? (
+            <ul className="studentCommMessageList" aria-live="polite">
+              {conversation.map((message) => {
+                const senderId = message.sender?._id || message.sender;
+                const isOwn = Boolean(myUserId && senderId && String(senderId) === String(myUserId));
+                const created = message.createdAt ? new Date(message.createdAt) : null;
+                const iso = created && !Number.isNaN(created.getTime()) ? created.toISOString() : undefined;
+                const when = created && !Number.isNaN(created.getTime()) ? created.toLocaleString() : "—";
+
+                return (
+                  <li
+                    key={message._id}
+                    className={`studentCommMessage ${isOwn ? "studentCommMessage--own" : "studentCommMessage--other"}`}
+                  >
+                    <div className="studentCommMessage__inner">
+                      <div className="studentCommMessage__meta">
+                        <span className="studentCommMessage__sender">{message.sender?.name || "User"}</span>
+                        <time className="studentCommMessage__time" dateTime={iso}>
+                          {when}
+                        </time>
+                      </div>
+                      <div className="studentCommMessage__bubble">{message.text}</div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+
+          {selectedStudentId && !threadLoading && conversation.length === 0 ? (
+            <div className="studentCommThreadPlaceholder studentCommThreadPlaceholder--subtle">
+              <p className="studentCommThreadPlaceholder__title">No messages yet</p>
+              <p className="studentCommThreadPlaceholder__text">Start the conversation with a clear question or next step.</p>
+            </div>
+          ) : null}
+
+          {students.length > 0 ? (
+            <form className="studentCommComposer" onSubmit={onSend}>
+              <label className="label" htmlFor="sup-comm-message-input">
+                Message
+              </label>
+              <textarea
+                id="sup-comm-message-input"
+                className="textarea studentCommComposer__input"
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                placeholder="Write guidance or feedback…"
+                rows={4}
+                required
+                disabled={busy || !selectedStudentId}
+              />
+              <div className="studentCommComposer__actions">
+                <button
+                  type="submit"
+                  className="button buttonPrimary studentCommComposer__send"
+                  disabled={busy || !selectedStudentId}
+                >
+                  {busy ? "Sending…" : "Send"}
+                </button>
+              </div>
+            </form>
+          ) : null}
+        </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 };
 

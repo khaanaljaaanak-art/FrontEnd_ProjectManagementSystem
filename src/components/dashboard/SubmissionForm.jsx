@@ -38,49 +38,58 @@ const SubmissionForm = ({
   else if (deadlinePassed) disabledReason = "Deadline has passed. Submissions are closed.";
   else if (alreadySubmitted && !allowResubmit) disabledReason = "You have already submitted for this assessment.";
 
+  const inputsLocked = submitting || (alreadySubmitted && !allowResubmit) || deadlinePassed;
+
   return (
-    <form onSubmit={onSubmit}>
-      <div className="row">
-        <div>
-          <label className="label">File URL</label>
+    <form className="studentSubmissionForm" onSubmit={onSubmit}>
+      <div className="studentSubmissionForm__fields">
+        <div className="studentSubmissionForm__group">
+          <label className="label" htmlFor="submission-file-url">
+            File URL
+          </label>
           <input
+            id="submission-file-url"
             className="input"
             type="url"
             placeholder="https://..."
             value={fileUrl}
             onChange={(e) => onChangeFileUrl(e.target.value)}
-            disabled={submitting || (alreadySubmitted && !allowResubmit) || deadlinePassed}
+            disabled={inputsLocked}
           />
-          <p className="helper" style={{ marginTop: 8 }}>
-            Or upload up to 3 files below.
-          </p>
+          <p className="studentSubmissionFieldHint">Link to a hosted file (Drive, Dropbox, GitHub, etc.).</p>
+        </div>
 
-          <label className="label" style={{ marginTop: 10 }}>Upload Files (max 3)</label>
+        <div className="studentSubmissionForm__divider">
+          <span className="studentSubmissionForm__dividerText">or upload files</span>
+        </div>
+
+        <div className="studentSubmissionForm__group">
+          <label className="label" htmlFor="submission-files">
+            Upload files (max 3)
+          </label>
           <input
-            className="input"
+            id="submission-files"
+            className="input studentSubmissionFileInput"
             type="file"
             multiple
             onChange={(e) => onChangeFiles(e.target.files)}
-            disabled={submitting || (alreadySubmitted && !allowResubmit) || deadlinePassed}
+            disabled={inputsLocked}
           />
-
-          {filesCount > 0 && (
-            <p className="helper">Selected: {filesCount} file(s)</p>
+          {filesCount > 0 ? (
+            <p className="studentSubmissionFileCount">
+              {filesCount} file{filesCount === 1 ? "" : "s"} selected
+            </p>
+          ) : (
+            <p className="studentSubmissionFieldHint">Up to three files. If you use a URL above, files are optional.</p>
           )}
-          {tooManyFiles && (
-            <p className="error">You can upload at most 3 files.</p>
-          )}
-
-          {disabledReason && <p className="helper">{disabledReason}</p>}
+          {tooManyFiles ? <p className="error">You can upload at most 3 files.</p> : null}
         </div>
       </div>
 
-      <div className="actions" style={{ marginTop: 14 }}>
-        <button
-          type="submit"
-          className="button buttonPrimary"
-          disabled={submitDisabled}
-        >
+      {disabledReason ? <p className="studentSubmissionDisabledNote">{disabledReason}</p> : null}
+
+      <div className="studentSubmissionForm__submit">
+        <button type="submit" className="button buttonPrimary studentSubmissionSubmitBtn" disabled={submitDisabled}>
           {submitting ? "Submitting…" : alreadySubmitted && allowResubmit ? "Resubmit" : "Submit"}
         </button>
       </div>

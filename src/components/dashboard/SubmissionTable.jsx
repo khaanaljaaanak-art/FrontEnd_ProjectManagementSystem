@@ -1,16 +1,16 @@
-const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave, currentUserId }) => {
+const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave, currentUserId, disabled = false }) => {
   if (!submissions || submissions.length === 0) return null;
 
   return (
-    <div className="tableWrap" style={{ marginTop: 12 }}>
-      <table className="table">
+    <div className="supervisorSubmissionTableWrap">
+      <table className="table studentHistoryTable supervisorSubmissionTable">
         <thead>
           <tr>
-            <th>Student</th>
-            <th>File URL</th>
-            <th>Marks</th>
-            <th>Feedback</th>
-            <th>Action</th>
+            <th scope="col">Student</th>
+            <th scope="col">Submission</th>
+            <th scope="col">Marks</th>
+            <th scope="col">Feedback</th>
+            <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -26,79 +26,86 @@ const SubmissionTable = ({ submissions, grading, onChangeDraft, onSave, currentU
             );
             const alreadyGradedByMe = Boolean(myGrade);
 
+            const urls =
+              Array.isArray(s.fileUrls) && s.fileUrls.length > 0
+                ? s.fileUrls
+                : s.fileUrl
+                  ? [s.fileUrl]
+                  : [];
+
             return (
-              <tr key={s._id}>
+              <tr key={s._id} className="supervisorSubmissionTable__row">
                 <td>
-                  <div style={{ fontWeight: 700 }}>{s.student?.name || "Student"}</div>
-                  <div className="helper" style={{ margin: 0 }}>
-                    {s.student?.email || ""}
-                  </div>
+                  <div className="supervisorSubmissionTable__studentName">{s.student?.name || "Student"}</div>
+                  <div className="supervisorSubmissionTable__studentEmail">{s.student?.email || ""}</div>
                 </td>
-                <td>
-                  {grades.length > 0 && (
-                    <div style={{ marginBottom: 8 }}>
+                <td className="supervisorSubmissionTable__filesCell">
+                  {grades.length > 0 ? (
+                    <ul className="supervisorSubmissionTable__grades">
                       {grades.map((grade, idx) => (
-                        <div key={`${grade.evaluator?._id || grade.evaluator}-${idx}`} className="helper" style={{ margin: 0 }}>
-                          {grade.evaluator?.name || "Supervisor"} ({grade.evaluatorRole}): {grade.marks}
-                        </div>
+                        <li key={`${grade.evaluator?._id || grade.evaluator}-${idx}`}>
+                          <span className="supervisorSubmissionTable__gradeWho">
+                            {grade.evaluator?.name || "Evaluator"}
+                          </span>
+                          <span className="supervisorSubmissionTable__gradeMeta">
+                            ({grade.evaluatorRole || "supervisor"}) ·{" "}
+                            <span className="studentHistoryTableMarks">{grade.marks}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {urls.length === 0 ? (
+                    <p className="supervisorSubmissionTable__muted">No file linked</p>
+                  ) : (
+                    <div className="supervisorSubmissionTable__links">
+                      {urls.map((url, idx) => (
+                        <a
+                          key={url}
+                          className="supervisorSubmissionLink"
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open file {idx + 1}
+                        </a>
                       ))}
                     </div>
                   )}
-                  {(() => {
-                    const urls =
-                      Array.isArray(s.fileUrls) && s.fileUrls.length > 0
-                        ? s.fileUrls
-                        : s.fileUrl
-                          ? [s.fileUrl]
-                          : [];
-
-                    return urls.length === 0 ? (
-                      <span className="helper" style={{ margin: 0 }}>
-                        No file
-                      </span>
-                    ) : (
-                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                        {urls.map((url, idx) => (
-                          <a key={url} href={url} target="_blank" rel="noreferrer">
-                            Open {idx + 1}
-                          </a>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                  <div className="helper" style={{ margin: 0 }}>
-                    Submitted: {new Date(s.submittedAt).toLocaleString()}
-                  </div>
+                  <p className="supervisorSubmissionTable__submitted">
+                    Submitted {s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "—"}
+                  </p>
                 </td>
-                <td style={{ minWidth: 140 }}>
+                <td className="supervisorSubmissionTable__marksCell">
                   <input
-                    className="input"
+                    className="input supervisorSubmissionTable__marksInput"
                     type="number"
                     value={draft.marks}
                     onChange={(e) => onChangeDraft(s._id, { ...draft, marks: e.target.value })}
                     placeholder="e.g. 85"
-                    disabled={alreadyGradedByMe}
+                    disabled={alreadyGradedByMe || disabled}
+                    aria-label={`Marks for ${s.student?.name || "student"}`}
                   />
                 </td>
-                <td style={{ minWidth: 240 }}>
-                  <input
-                    className="input"
+                <td className="supervisorSubmissionTable__feedbackCell">
+                  <textarea
+                    className="textarea supervisorSubmissionTable__feedbackInput"
                     value={draft.feedback}
-                    onChange={(e) =>
-                      onChangeDraft(s._id, { ...draft, feedback: e.target.value })
-                    }
-                    placeholder="Short feedback"
-                    disabled={alreadyGradedByMe}
+                    onChange={(e) => onChangeDraft(s._id, { ...draft, feedback: e.target.value })}
+                    placeholder="Feedback for the student"
+                    rows={3}
+                    disabled={alreadyGradedByMe || disabled}
+                    aria-label={`Feedback for ${s.student?.name || "student"}`}
                   />
                 </td>
-                <td style={{ whiteSpace: "nowrap" }}>
+                <td className="supervisorSubmissionTable__actionCell">
                   <button
                     type="button"
-                    className="button buttonPrimary"
+                    className="button buttonPrimary supervisorSubmissionTable__saveBtn"
                     onClick={() => onSave(s._id)}
-                    disabled={alreadyGradedByMe}
+                    disabled={alreadyGradedByMe || disabled}
                   >
-                    {alreadyGradedByMe ? "Updated" : "Save"}
+                    {alreadyGradedByMe ? "Saved" : "Save"}
                   </button>
                 </td>
               </tr>

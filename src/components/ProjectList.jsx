@@ -1,71 +1,125 @@
 import { useProjects } from "../context/ProjectContext";
 import ErrorMessage from "./common/ErrorMessage";
-import SkeletonList from "./common/SkeletonList";
 
-const ProjectList = ({ selectable = false, selectedProjectId, onSelect }) => {
+const ProjectListBody = ({
+  projects,
+  loading,
+  error,
+  selectable,
+  selectedProjectId,
+  onSelect,
+  listId,
+}) => (
+  <>
+    <ErrorMessage message={error} />
+
+    {loading && (
+      <p className="studentOverviewStatus" role="status">
+        <span className="studentOverviewSpinner" aria-hidden />
+        Loading projects…
+      </p>
+    )}
+
+    {!loading && projects.length === 0 && !error && (
+      <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+        <p className="studentOverviewEmpty__title">No projects listed</p>
+        <p className="studentOverviewEmpty__text">
+          When your administrator assigns available projects, they will show up here.
+        </p>
+      </div>
+    )}
+
+    {!loading && projects.length > 0 && (
+      <ul className="studentSubmitProjectList" id={listId}>
+        {projects.map((project) => {
+          const isSelected = selectable && selectedProjectId === project._id;
+
+          return (
+            <li
+              key={project._id}
+              className={`studentSubmitProjectRow ${isSelected ? "studentSubmitProjectRow--selected" : ""}`}
+            >
+              <div className="studentSubmitProjectRow__main">
+                <h3 className="studentSubmitProjectRow__title">{project.title}</h3>
+                {project.description ? (
+                  <p className="studentSubmitProjectRow__desc">{project.description}</p>
+                ) : (
+                  <p className="studentSubmitProjectRow__desc studentSubmitProjectRow__desc--muted">No description</p>
+                )}
+              </div>
+              {selectable ? (
+                <div className="studentSubmitProjectRow__actions">
+                  <button
+                    type="button"
+                    className={
+                      isSelected ? "button buttonPrimary studentSubmitProjectRow__cta" : "button studentSubmitProjectRow__cta"
+                    }
+                    onClick={() => onSelect?.(project)}
+                    aria-pressed={isSelected}
+                  >
+                    {isSelected ? "Selected" : "Select"}
+                  </button>
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </>
+);
+
+const ProjectList = ({ selectable = false, selectedProjectId, onSelect, embedded = false, listId }) => {
   const { projects, loading, error, refreshProjects } = useProjects();
 
-  return (
-    <div className="card">
-      <div className="cardHeader">
-        <div>
-          <p className="cardTitle">Projects</p>
-          <p className="cardHint">Browse available projects</p>
+  if (embedded) {
+    return (
+      <div className="studentSubmitProjectEmbed">
+        <div className="studentSubmitProjectEmbed__bar">
+          <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh list"}
+          </button>
         </div>
-
-        <button
-          type="button"
-          className="button"
-          onClick={refreshProjects}
-          disabled={loading}
-        >
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
+        <ProjectListBody
+          projects={projects}
+          loading={loading}
+          error={error}
+          selectable={selectable}
+          selectedProjectId={selectedProjectId}
+          onSelect={onSelect}
+          listId={listId}
+        />
       </div>
+    );
+  }
 
-      {loading && <SkeletonList rows={4} />}
-      <ErrorMessage message={error} />
-      {!loading && projects.length === 0 && !error && (
-        <p className="helper">No projects found.</p>
-      )}
+  return (
+    <section className="card studentOverviewCard studentSubmitProjectPanel" aria-labelledby="submit-projects-heading">
+      <header className="studentOverviewCard__header studentOverviewCard__header--split">
+        <div>
+          <p className="studentOverviewCard__eyebrow">Workspace</p>
+          <h2 id="submit-projects-heading" className="cardTitle">
+            Projects
+          </h2>
+          <p className="cardHint">Choose the project you are submitting work for. Assessments load after you select.</p>
+        </div>
+        <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
+          {loading ? "Refreshing…" : "Refresh list"}
+        </button>
+      </header>
 
-      {!loading && projects.length > 0 && (
-        <ul className="list">
-          {projects.map((project) => {
-            const isSelected = selectedProjectId === project._id;
-
-            return (
-              <li
-                key={project._id}
-                className="item"
-                style={
-                  selectable && isSelected
-                    ? { outline: "2px solid var(--focus)" }
-                    : undefined
-                }
-              >
-                <div className="actions" style={{ justifyContent: "space-between" }}>
-                  <div>
-                    <p className="itemTitle">{project.title}</p>
-                    <p className="itemMeta">{project.description}</p>
-                  </div>
-
-                  {selectable && (
-                    <button
-                      type="button"
-                      className={isSelected ? "button buttonPrimary" : "button"}
-                      onClick={() => onSelect?.(project)}
-                    >
-                      {isSelected ? "Selected" : "Select"}
-                    </button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
+      <div className="studentOverviewCard__body">
+        <ProjectListBody
+          projects={projects}
+          loading={loading}
+          error={error}
+          selectable={selectable}
+          selectedProjectId={selectedProjectId}
+          onSelect={onSelect}
+          listId={listId}
+        />
+      </div>
+    </section>
   );
 };
 

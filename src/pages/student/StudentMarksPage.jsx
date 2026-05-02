@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import { fetchAssessmentStatus, fetchMarksWithRubrics } from "../../services/studentService";
 
+const formatRole = (role) => {
+  if (!role || typeof role !== "string") return "Supervisor";
+  const r = role.trim();
+  if (!r) return "Supervisor";
+  return r.charAt(0).toUpperCase() + r.slice(1).toLowerCase();
+};
+
 const StudentMarksPage = () => {
   const [statusRows, setStatusRows] = useState([]);
   const [markRows, setMarkRows] = useState([]);
@@ -31,96 +38,191 @@ const StudentMarksPage = () => {
 
   return (
     <div className="grid grid2">
-      <div className="card">
-        <div className="cardHeader">
+      <section className="card studentOverviewCard" aria-labelledby="student-status-heading">
+        <header className="studentOverviewCard__header studentOverviewCard__header--split">
           <div>
-            <p className="cardTitle">Submission Status</p>
-            <p className="cardHint">Track pending, submitted, and graded progress</p>
+            <p className="studentOverviewCard__eyebrow">Workflow</p>
+            <h2 id="student-status-heading" className="cardTitle">
+              Submission status
+            </h2>
+            <p className="cardHint">Pending, submitted, and graded assessments for your project.</p>
           </div>
-          <button type="button" className="button" onClick={load} disabled={loading}>
-            Refresh
+          <button type="button" className="button buttonRefresh" onClick={load} disabled={loading}>
+            Refresh list
           </button>
+        </header>
+
+        <div className="studentOverviewCard__body">
+          <ErrorMessage message={error} />
+          {loading && (
+            <p className="studentOverviewStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading status…
+            </p>
+          )}
+
+          {!loading && (
+            <ul className="studentStatusList">
+              {statusRows.map((row, idx) => (
+                <li key={row.assessment?._id ?? `status-${idx}`} className="studentStatusRow">
+                  <p className="studentStatusRow__title">{row.assessment?.title || "Assessment"}</p>
+                  <p className="studentStatusRow__meta">
+                    <span className="studentStatusRow__label">Status</span>
+                    <span className="studentStatusPill">{row.status || "—"}</span>
+                  </p>
+                  <p className="studentStatusRow__deadline">
+                    <span className="studentStatusRow__label">Deadline</span>
+                    {row.effectiveDeadline ? new Date(row.effectiveDeadline).toLocaleString() : "Not set"}
+                  </p>
+                  {row.submission?.feedback ? (
+                    <p className="studentStatusRow__feedback">
+                      <span className="studentStatusRow__label">Feedback</span>
+                      {row.submission.feedback}
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+          {!loading && statusRows.length === 0 && (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No assessments</p>
+              <p className="studentOverviewEmpty__text">Nothing to show yet. Check back after assessments are assigned.</p>
+            </div>
+          )}
         </div>
+      </section>
 
-        <ErrorMessage message={error} />
-        {loading && <p className="helper">Loading status…</p>}
-
-        {!loading && (
-          <ul className="list">
-            {statusRows.map((row) => (
-              <li key={row.assessment?._id} className="item">
-                <p className="itemTitle">{row.assessment?.title}</p>
-                <p className="helper">Status: {row.status}</p>
-                <p className="helper">
-                  Deadline: {row.effectiveDeadline ? new Date(row.effectiveDeadline).toLocaleString() : "N/A"}
-                </p>
-                {row.submission?.feedback && <p className="itemMeta">Feedback: {row.submission.feedback}</p>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="card">
-        <div className="cardHeader">
+      <section className="card studentOverviewCard" aria-labelledby="student-marks-heading">
+        <header className="studentOverviewCard__header">
           <div>
-            <p className="cardTitle">Marks and Rubrics</p>
-            <p className="cardHint">View evaluated marks with rubric criteria</p>
+            <p className="studentOverviewCard__eyebrow">Results</p>
+            <h2 id="student-marks-heading" className="cardTitle">
+              Marks and rubrics
+            </h2>
+            <p className="cardHint">Official scores from evaluators and the marking scheme for each assessment.</p>
           </div>
+        </header>
+
+        <div className="studentOverviewCard__body">
+          {loading && (
+            <p className="studentOverviewStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading marks…
+            </p>
+          )}
+
+          {!loading && markRows.length === 0 && (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No marks yet</p>
+              <p className="studentOverviewEmpty__text">
+                Grades will appear here once submissions exist and supervisors have recorded marks.
+              </p>
+            </div>
+          )}
+
+          {!loading && markRows.length > 0 && (
+            <ul className="studentMarkEntryList">
+              {markRows.map((row, rowIndex) => {
+                const submission = row.submission;
+                const assessmentTitle = submission?.assessment?.title || "Assessment";
+                const projectTitle = submission?.assessment?.project?.title || "Project";
+                const grades = Array.isArray(submission?.grades) ? submission.grades : [];
+                const entryKey = submission?._id || submission?.assessment?._id || `mark-${rowIndex}`;
+
+                return (
+                  <li key={entryKey} className="studentMarkEntry">
+                    <header className="studentMarkEntry__head">
+                      <h3 className="studentMarkEntry__title">{assessmentTitle}</h3>
+                      <p className="studentMarkEntry__project">{projectTitle}</p>
+                    </header>
+
+                    {grades.length > 0 ? (
+                      <div className="studentMarkEntry__section">
+                        <p className="studentAssignedBlock__label">Evaluator marks</p>
+                        <ul className="studentEvalGradeList">
+                          {grades.map((grade, index) => (
+                            <li
+                              key={`${grade.evaluator?._id || grade.evaluator || "grade"}-${index}`}
+                              className="studentEvalGrade"
+                            >
+                              <div className="studentEvalGrade__person">
+                                <span className="studentSupervisorChip__avatar" aria-hidden>
+                                  {(grade.evaluator?.name || "?").trim().charAt(0).toUpperCase()}
+                                </span>
+                                <div className="studentEvalGrade__personText">
+                                  <span className="studentEvalGrade__name">{grade.evaluator?.name || "Evaluator"}</span>
+                                  <span className="studentEvalGrade__role">{formatRole(grade.evaluatorRole)}</span>
+                                </div>
+                                <span
+                                  className={`studentMarkScoreBadge ${
+                                    grade.marks == null ? "studentMarkScoreBadge--muted" : ""
+                                  }`}
+                                >
+                                  {grade.marks != null ? grade.marks : "—"}
+                                </span>
+                              </div>
+                              {grade.feedback ? (
+                                <div className="studentEvalGrade__feedback">
+                                  <span className="studentEvalGrade__feedbackLabel">Feedback</span>
+                                  <p className="studentEvalGrade__feedbackText">{grade.feedback}</p>
+                                </div>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="studentMarkEntry__section">
+                        <dl className="studentMarkDl">
+                          <div className="studentMarkDl__row">
+                            <dt>Marks</dt>
+                            <dd>
+                              {submission?.marks != null ? (
+                                <span className="studentMarkScoreBadge">{submission.marks}</span>
+                              ) : (
+                                <span className="studentMarkScoreBadge studentMarkScoreBadge--muted">Not graded</span>
+                              )}
+                            </dd>
+                          </div>
+                          {submission?.feedback ? (
+                            <div className="studentMarkDl__row studentMarkDl__row--block">
+                              <dt>Feedback</dt>
+                              <dd className="studentMarkDl__feedback">{submission.feedback}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      </div>
+                    )}
+
+                    {row.rubric ? (
+                      <div className="studentRubricBlock">
+                        <div className="studentRubricBlock__head">
+                          <span className="studentRubricBlock__title">Rubric criteria</span>
+                          <span className="studentRubricBlock__meta">{row.rubric.totalMarks} pts maximum</span>
+                        </div>
+                        <ul className="studentRubricCriteria">
+                          {(row.rubric.criteria || []).map((criterion, index) => (
+                            <li key={`${criterion.title}-${index}`} className="studentRubricCriterion">
+                              <div className="studentRubricCriterion__top">
+                                <span className="studentRubricCriterion__title">{criterion.title}</span>
+                                <span className="studentRubricCriterion__max">Max {criterion.maxMarks}</span>
+                              </div>
+                              {criterion.description ? (
+                                <p className="studentRubricCriterion__desc">{criterion.description}</p>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
-
-        {loading && <p className="helper">Loading marks…</p>}
-
-        {!loading && (
-          <ul className="list">
-            {markRows.map((row) => (
-              <li key={row.submission?._id} className="item">
-                <p className="itemTitle">
-                  {row.submission?.assessment?.title || "Assessment"} · {row.submission?.assessment?.project?.title || "Project"}
-                </p>
-                {Array.isArray(row.submission?.grades) && row.submission.grades.length > 0 ? (
-                  <div style={{ marginTop: 8 }}>
-                    <p className="helper">Evaluator Marks</p>
-                    <ul className="list">
-                      {row.submission.grades.map((grade, index) => (
-                        <li
-                          key={`${grade.evaluator?._id || grade.evaluator || "grade"}-${index}`}
-                          className="item"
-                        >
-                          <p className="itemTitle">
-                            {grade.evaluator?.name || "Supervisor"} ({grade.evaluatorRole || "supervisor"})
-                          </p>
-                          <p className="helper">Marks: {grade.marks ?? "-"}</p>
-                          {grade.feedback && <p className="itemMeta">Feedback: {grade.feedback}</p>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="helper">Marks: {row.submission?.marks ?? "Not graded"}</p>
-                    {row.submission?.feedback && <p className="itemMeta">Feedback: {row.submission.feedback}</p>}
-                  </div>
-                )}
-                {row.rubric && (
-                  <div style={{ marginTop: 8 }}>
-                    <p className="helper">Rubric (Total: {row.rubric.totalMarks})</p>
-                    <ul className="list">
-                      {(row.rubric.criteria || []).map((criterion, index) => (
-                        <li key={`${criterion.title}-${index}`} className="item">
-                          <p className="itemTitle">{criterion.title}</p>
-                          <p className="itemMeta">{criterion.description}</p>
-                          <p className="helper">Max: {criterion.maxMarks}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      </section>
     </div>
   );
 };

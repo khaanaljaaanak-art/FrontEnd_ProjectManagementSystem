@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const portalLabel = (role) => {
@@ -7,13 +8,63 @@ const portalLabel = (role) => {
   return "Assessment Portal";
 };
 
-const Layout = ({ title, subtitle, children }) => {
+/** Picks the nav label for the longest `to` that matches the pathname. */
+const activeNavLabel = (pathname, items) => {
+  if (!items?.length) return "";
+  let best = "";
+  let bestLen = -1;
+  for (const item of items) {
+    const { to, label } = item;
+    if (pathname === to || pathname.startsWith(`${to}/`)) {
+      if (to.length > bestLen) {
+        bestLen = to.length;
+        best = label;
+      }
+    }
+  }
+  return best;
+};
+
+const Layout = ({ title, subtitle, children, sidebar, sidebarNavItems }) => {
+  const { pathname } = useLocation();
   const { token, role, logout } = useAuth();
   const activePortalLabel = token ? portalLabel(role) : "Assessment Portal";
+  const topBarPageTitle =
+    activeNavLabel(pathname, sidebarNavItems) || title || "";
+
+  if (sidebar) {
+    return (
+      <div className="appShell appShell--dashboard">
+        <div className="dashboardFrame">
+          <div className="dashboardSidebarColumn">{sidebar}</div>
+          <div className="dashboardContentColumn">
+            <header className="dashboardTopBar">
+              <div className="dashboardTopBarInner">
+                <h2 className="dashboardTopBarTitle">{topBarPageTitle}</h2>
+                <button
+                  type="button"
+                  className="button buttonDanger"
+                  aria-label="Log out"
+                  onClick={logout}
+                >
+                  Log out
+                </button>
+              </div>
+            </header>
+            <main className="dashboardScrollMain">
+              <div className="dashboardMainInner">
+                <div className="dashboardOutlet">{children}</div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="appShell">
-      <div className="header">
+      <header className="header">
         <div className="headerInner">
           <div className="brand">
             <div className="brandTitle">Project Management System</div>
@@ -33,7 +84,7 @@ const Layout = ({ title, subtitle, children }) => {
             )}
           </div>
         </div>
-      </div>
+      </header>
 
       <main className="container appMain">
         {title && (

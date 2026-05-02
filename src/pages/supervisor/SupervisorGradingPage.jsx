@@ -18,6 +18,7 @@ const SupervisorGradingPage = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [rubric, setRubric] = useState(null);
+  const [rubricLoading, setRubricLoading] = useState(false);
 
   const currentUserId = useMemo(() => {
     try {
@@ -58,11 +59,18 @@ const SupervisorGradingPage = () => {
     setSelectedAssessmentId(assessmentId);
     setRubric(null);
     setError("");
+    if (!assessmentId) {
+      setRubricLoading(false);
+      return;
+    }
+    setRubricLoading(true);
     try {
       const rubricData = await fetchRubricByAssessment(assessmentId);
       setRubric(rubricData);
     } catch (_e) {
       setError("Unable to load rubric for this assessment.");
+    } finally {
+      setRubricLoading(false);
     }
   };
 
@@ -84,7 +92,7 @@ const SupervisorGradingPage = () => {
         feedback: draft.feedback || "",
       });
       setSubmissions((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
-      setMessage("Assessment evaluation saved.");
+      setMessage("Evaluation saved.");
       await refreshSubmissions();
     } catch (_e) {
       const apiMessage = _e?.response?.data?.message;
@@ -95,91 +103,166 @@ const SupervisorGradingPage = () => {
   };
 
   return (
-    <div className="grid grid2">
-      <div className="card">
-        <div className="cardHeader">
+    <div className="grid grid2 supervisorGradingGrid">
+      <section className="card studentOverviewCard" aria-labelledby="sup-grade-scope-heading">
+        <header className="studentOverviewCard__header">
           <div>
-            <p className="cardTitle">Assigned Projects</p>
-            <p className="cardHint">Select a project and assessment to evaluate</p>
+            <p className="studentOverviewCard__eyebrow">Setup</p>
+            <h2 id="sup-grade-scope-heading" className="cardTitle">
+              Evaluation scope
+            </h2>
+            <p className="cardHint">Select the project and assessment you are marking. Submissions and the rubric load for that task.</p>
+          </div>
+        </header>
+
+        <div className="studentOverviewCard__body">
+          <div className="supervisorPickColumn">
+            <ProjectSelector
+              embedded
+              selectedProjectId={selectedProjectId}
+              onSelect={(project) => {
+                setSelectedProjectId(project?._id || "");
+                setSelectedAssessmentId("");
+                setRubric(null);
+              }}
+            />
+
+            <AssessmentList
+              selectId="grading-assessment-select"
+              assessments={assessments}
+              loading={loadingAssessments}
+              error={assessmentError}
+              disabled={!selectedProject?._id}
+              selectedAssessmentId={selectedAssessmentId}
+              onSelect={selectAssessment}
+              selectedAssessment={selectedAssessment}
+              helper={!selectedProject?._id ? "Select a project first." : ""}
+            />
           </div>
         </div>
+      </section>
 
-        <ProjectSelector
-          selectedProjectId={selectedProjectId}
-          onSelect={(project) => {
-            setSelectedProjectId(project?._id || "");
-            setSelectedAssessmentId("");
-            setRubric(null);
-          }}
-        />
+      <section className="card studentOverviewCard supervisorGradingRubricCard" aria-labelledby="sup-grade-rubric-heading">
+        <header className="studentOverviewCard__header">
+          <div>
+            <p className="studentOverviewCard__eyebrow">Scheme</p>
+            <h2 id="sup-grade-rubric-heading" className="cardTitle">
+              Marking rubric
+            </h2>
+            <p className="cardHint">Criteria and maximum marks for the selected assessment.</p>
+          </div>
+        </header>
 
-        <div style={{ marginTop: 12 }}>
-          <AssessmentList
-            assessments={assessments}
-            loading={loadingAssessments}
-            error={assessmentError}
-            disabled={!selectedProject?._id}
-            selectedAssessmentId={selectedAssessmentId}
-            onSelect={selectAssessment}
-            selectedAssessment={selectedAssessment}
-            helper={!selectedProject?._id ? "Select a project first." : ""}
+        <div className="studentOverviewCard__body">
+          {rubricLoading ? (
+            <p className="studentOverviewStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading rubric…
+            </p>
+          ) : null}
+
+          {!selectedAssessmentId && !rubricLoading ? (
+            <div className="studentCommThreadPlaceholder studentCommThreadPlaceholder--subtle">
+              <p className="studentCommThreadPlaceholder__title">No assessment selected</p>
+              <p className="studentCommThreadPlaceholder__text">Choose an assessment on the left to load its rubric.</p>
+            </div>
+          ) : null}
+
+          {selectedAssessmentId && !rubricLoading && !rubric ? (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No rubric loaded</p>
+              <p className="studentOverviewEmpty__text">
+                This assessment may not have a rubric yet, or loading failed—see any error above.
+              </p>
+            </div>
+          ) : null}
+
+          {rubric ? (
+            <div className="studentRubricBlock supervisorGradingRubricBody">
+              <div className="studentRubricBlock__head">
+                <span className="studentRubricBlock__title">Rubric criteria</span>
+                <span className="studentRubricBlock__meta">{rubric.totalMarks} pts maximum</span>
+              </div>
+              <ul className="studentRubricCriteria">
+                {(rubric.criteria || []).map((criterion, index) => (
+                  <li key={`${criterion.title}-${index}`} className="studentRubricCriterion">
+                    <div className="studentRubricCriterion__top">
+                      <span className="studentRubricCriterion__title">{criterion.title}</span>
+                      <span className="studentRubricCriterion__max">Max {criterion.maxMarks}</span>
+                    </div>
+                    {criterion.description ? (
+                      <p className="studentRubricCriterion__desc">{criterion.description}</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section
+        className="card studentOverviewCard supervisorGradingSubmissionsCard"
+        style={{ gridColumn: "1 / -1" }}
+        aria-labelledby="sup-grade-submissions-heading"
+      >
+        <header className="studentOverviewCard__header">
+          <div>
+            <p className="studentOverviewCard__eyebrow">Queue</p>
+            <h2 id="sup-grade-submissions-heading" className="cardTitle">
+              Submissions and feedback
+            </h2>
+            <p className="cardHint">Open student files, enter marks and feedback, then save. Your row locks after you submit a grade.</p>
+          </div>
+        </header>
+
+        <div className="studentOverviewCard__body">
+          <ErrorMessage message={error || submissionError} />
+
+          {message ? (
+            <p className="studentOverviewBanner studentOverviewBanner--success supervisorGradingBanner">{message}</p>
+          ) : null}
+
+          {busy ? (
+            <p className="studentOverviewStatus supervisorGradingStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Saving evaluation…
+            </p>
+          ) : null}
+
+          {loadingSubmissions ? (
+            <p className="studentOverviewStatus supervisorGradingStatus" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Loading submissions…
+            </p>
+          ) : null}
+
+          {!loadingSubmissions && selectedAssessmentId && submissions.length === 0 ? (
+            <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+              <p className="studentOverviewEmpty__title">No submissions yet</p>
+              <p className="studentOverviewEmpty__text">Nothing to grade for this assessment. Check back after students submit.</p>
+            </div>
+          ) : null}
+
+          {!loadingSubmissions && !selectedAssessmentId ? (
+            <div className="studentCommThreadPlaceholder studentCommThreadPlaceholder--subtle">
+              <p className="studentCommThreadPlaceholder__title">Select an assessment</p>
+              <p className="studentCommThreadPlaceholder__text">Pick an assessment above to load its submission queue.</p>
+            </div>
+          ) : null}
+
+          <SubmissionTable
+            submissions={submissions}
+            grading={grading}
+            currentUserId={currentUserId}
+            onChangeDraft={(submissionId, value) =>
+              setGrading((prev) => ({ ...prev, [submissionId]: value }))
+            }
+            onSave={onSave}
+            disabled={busy}
           />
         </div>
-      </div>
-
-      <div className="card">
-        <div className="cardHeader">
-          <div>
-            <p className="cardTitle">Marking Rubric</p>
-            <p className="cardHint">Use rubric criteria for consistent grading</p>
-          </div>
-        </div>
-
-        {!selectedAssessmentId && <p className="helper">Choose an assessment to load rubric.</p>}
-
-        {rubric && (
-          <ul className="list">
-            {(rubric.criteria || []).map((criterion, index) => (
-              <li key={`${criterion.title}-${index}`} className="item">
-                <p className="itemTitle">{criterion.title}</p>
-                <p className="itemMeta">{criterion.description}</p>
-                <p className="helper">Max Marks: {criterion.maxMarks}</p>
-              </li>
-            ))}
-            <li className="item">
-              <p className="helper">Total Marks: {rubric.totalMarks}</p>
-            </li>
-          </ul>
-        )}
-      </div>
-
-      <div className="card" style={{ gridColumn: "1 / -1" }}>
-        <div className="cardHeader">
-          <div>
-            <p className="cardTitle">Submissions and Feedback</p>
-            <p className="cardHint">Evaluate, mark, and comment on student submissions</p>
-          </div>
-        </div>
-
-        <ErrorMessage message={error || submissionError} />
-        {message && <p className="helper">{message}</p>}
-        {busy && <p className="helper">Saving evaluation…</p>}
-        {loadingSubmissions && <p className="helper">Loading submissions…</p>}
-
-        {!loadingSubmissions && selectedAssessmentId && submissions.length === 0 && (
-          <p className="helper">No submissions for this assessment yet.</p>
-        )}
-
-        <SubmissionTable
-          submissions={submissions}
-          grading={grading}
-          currentUserId={currentUserId}
-          onChangeDraft={(submissionId, value) =>
-            setGrading((prev) => ({ ...prev, [submissionId]: value }))
-          }
-          onSave={onSave}
-        />
-      </div>
+      </section>
     </div>
   );
 };

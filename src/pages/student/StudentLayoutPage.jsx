@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Layout from "../../components/Layout";
-import DashboardNavbar from "../../components/common/DashboardNavbar";
+import DashboardSidebar from "../../components/common/DashboardSidebar";
 
 const navItems = [
   { to: "/student/overview", label: "Overview" },
@@ -15,10 +15,10 @@ const StudentLayoutPage = () => {
   return (
     <Layout
       title="Student Portal"
-      subtitle="Projects, submissions, marks, feedback, notifications, and communication"
+      subtitle="Your coursework hub—each area opens as its own workspace"
+      sidebar={<DashboardSidebar items={navItems} />}
+      sidebarNavItems={navItems}
     >
-      <DashboardNavbar items={navItems} />
-
       <Outlet />
     </Layout>
   );

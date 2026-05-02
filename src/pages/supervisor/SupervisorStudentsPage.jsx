@@ -26,62 +26,82 @@ const SupervisorStudentsPage = () => {
   }, []);
 
   return (
-    <div className="card">
-      <div className="cardHeader">
+    <section className="card studentOverviewCard supervisorStudentsPage" aria-labelledby="sup-students-heading">
+      <header className="studentOverviewCard__header studentOverviewCard__header--split">
         <div>
-          <p className="cardTitle">Assigned Students and Progress</p>
-          <p className="cardHint">Track progress and completion by student</p>
+          <p className="studentOverviewCard__eyebrow">Roster</p>
+          <h2 id="sup-students-heading" className="cardTitle">
+            Assigned students
+          </h2>
+          <p className="cardHint">Submission volume, grading progress, and recent activity for everyone you supervise.</p>
         </div>
-        <button type="button" className="button" onClick={load} disabled={loading}>
-          {loading ? "Refreshing…" : "Refresh"}
+        <button type="button" className="button buttonRefresh" onClick={load} disabled={loading}>
+          {loading ? "Refreshing…" : "Refresh list"}
         </button>
-      </div>
+      </header>
 
-      <ErrorMessage message={error} />
-      {loading && <p className="helper">Loading student progress…</p>}
+      <div className="studentOverviewCard__body">
+        <ErrorMessage message={error} />
 
-      {!loading && rows.length === 0 && (
-        <p className="helper">No assigned student activity found yet.</p>
-      )}
+        {loading ? (
+          <p className="studentOverviewStatus" role="status">
+            <span className="studentOverviewSpinner" aria-hidden />
+            Loading student progress…
+          </p>
+        ) : null}
 
-      {!loading && rows.length > 0 && (
-        <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Projects</th>
-                <th>Submissions</th>
-                <th>Graded</th>
-                <th>Average Marks</th>
-                <th>Latest Activity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.student?._id}>
-                  <td>
-                    <div style={{ fontWeight: 700 }}>{row.student?.name || "Student"}</div>
-                    <div className="helper" style={{ margin: 0 }}>
-                      {row.student?.email || ""}
-                    </div>
-                  </td>
-                  <td>{Array.isArray(row.projects) ? row.projects.join(", ") : "-"}</td>
-                  <td>{row.submissionsCount ?? 0}</td>
-                  <td>{row.gradedCount ?? 0}</td>
-                  <td>{row.averageMarks ?? "-"}</td>
-                  <td>
-                    {row.latestSubmissionAt
-                      ? new Date(row.latestSubmissionAt).toLocaleString()
-                      : "-"}
-                  </td>
+        {!loading && rows.length === 0 ? (
+          <div className="studentOverviewEmpty studentOverviewEmpty--compact">
+            <p className="studentOverviewEmpty__title">No students yet</p>
+            <p className="studentOverviewEmpty__text">
+              When students are assigned to your projects, their progress summary will appear in this table.
+            </p>
+          </div>
+        ) : null}
+
+        {!loading && rows.length > 0 ? (
+          <div className="supervisorStudentsTableWrap">
+            <table className="table supervisorStudentsTable">
+              <thead>
+                <tr>
+                  <th scope="col">Student</th>
+                  <th scope="col">Projects</th>
+                  <th scope="col">Submissions</th>
+                  <th scope="col">Graded</th>
+                  <th scope="col">Avg. marks</th>
+                  <th scope="col">Latest activity</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.student?._id}>
+                    <td>
+                      <div className="supervisorStudentsTable__name">{row.student?.name || "Student"}</div>
+                      <div className="supervisorStudentsTable__email">{row.student?.email || "—"}</div>
+                    </td>
+                    <td className="supervisorStudentsTable__projects">
+                      {Array.isArray(row.projects) && row.projects.length > 0 ? row.projects.join(", ") : "—"}
+                    </td>
+                    <td className="supervisorStudentsTable__num">{row.submissionsCount ?? 0}</td>
+                    <td className="supervisorStudentsTable__num">{row.gradedCount ?? 0}</td>
+                    <td className="supervisorStudentsTable__marks">
+                      {row.averageMarks != null ? (
+                        <span className="studentHistoryTableMarks">{row.averageMarks}</span>
+                      ) : (
+                        <span className="studentHistoryTableDash">—</span>
+                      )}
+                    </td>
+                    <td className="supervisorStudentsTable__time">
+                      {row.latestSubmissionAt ? new Date(row.latestSubmissionAt).toLocaleString() : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 };
 

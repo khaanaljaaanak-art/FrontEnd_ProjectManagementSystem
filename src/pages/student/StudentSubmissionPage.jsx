@@ -168,70 +168,99 @@ const StudentSubmissionPage = () => {
         }
       />
 
-      <div className="card">
-        <div className="cardHeader">
+      <section className="card studentOverviewCard studentSubmissionPortal" aria-labelledby="submission-portal-heading">
+        <header className="studentOverviewCard__header">
           <div>
-            <p className="cardTitle">Dedicated Submission Portal</p>
-            <p className="cardHint">Upload, edit, and resubmit before deadline</p>
+            <p className="studentOverviewCard__eyebrow">Hand-in</p>
+            <h2 id="submission-portal-heading" className="cardTitle">
+              Submission portal
+            </h2>
+            <p className="cardHint">Upload or link your work, then submit before the assessment deadline.</p>
           </div>
-        </div>
+        </header>
 
-        <AssessmentList
-          assessments={assessments}
-          loading={loadingAssessments}
-          error={assessmentError}
-          disabled={!selectedProject?._id}
-          selectedAssessmentId={state.selectedAssessmentId}
-          onSelect={(id) => dispatch({ type: "selectAssessment", assessmentId: id })}
-          selectedAssessment={selectedAssessment}
-          helper={!selectedProject?._id ? "Select a project first." : ""}
-        />
+        <div className="studentOverviewCard__body">
+          <div className="studentSubmissionSection">
+            <AssessmentList
+              className="studentSubmissionAssess"
+              selectId="submission-assessment-select"
+              assessments={assessments}
+              loading={loadingAssessments}
+              error={assessmentError}
+              disabled={!selectedProject?._id}
+              selectedAssessmentId={state.selectedAssessmentId}
+              onSelect={(id) => dispatch({ type: "selectAssessment", assessmentId: id })}
+              selectedAssessment={selectedAssessment}
+              helper={!selectedProject?._id ? "Select a project first." : ""}
+            />
+          </div>
 
-        {loadingMySubmission && state.selectedAssessmentId && (
-          <p className="helper">Checking your submission…</p>
-        )}
-
-        <ErrorMessage message={mySubmissionError || state.submitError} />
-
-        {mySubmission && (
-          <div className="card" style={{ marginTop: 12, padding: 12 }}>
-            <p className="cardTitle" style={{ margin: 0 }}>Current Submission</p>
-            <p className="helper" style={{ marginTop: 6 }}>
-              Latest: {new Date(mySubmission.lastSubmittedAt || mySubmission.submittedAt || mySubmission.createdAt).toLocaleString()}
+          {loadingMySubmission && state.selectedAssessmentId ? (
+            <p className="studentOverviewStatus studentSubmissionSection" role="status">
+              <span className="studentOverviewSpinner" aria-hidden />
+              Checking your submission…
             </p>
-            <p className="helper">Attempts: {mySubmission.attemptCount || 1}</p>
-            <p className="helper">Status: {mySubmission.status || "submitted"}</p>
-            {hasAnyGrade ? (
-              <p className="helper">Resubmission closed because grading has already been submitted.</p>
-            ) : !canResubmit ? (
-              <p className="helper">Deadline passed or unavailable. Resubmission closed.</p>
-            ) : null}
+          ) : null}
+
+          <ErrorMessage message={mySubmissionError || state.submitError} />
+
+          {mySubmission ? (
+            <article className="studentSubmissionCurrent">
+              <h3 className="studentSubmissionCurrent__title">Current submission</h3>
+              <dl className="studentSubmissionCurrent__dl">
+                <div className="studentSubmissionCurrent__row">
+                  <dt>Last sent</dt>
+                  <dd>
+                    {new Date(
+                      mySubmission.lastSubmittedAt || mySubmission.submittedAt || mySubmission.createdAt
+                    ).toLocaleString()}
+                  </dd>
+                </div>
+                <div className="studentSubmissionCurrent__row">
+                  <dt>Attempts</dt>
+                  <dd>{mySubmission.attemptCount || 1}</dd>
+                </div>
+                <div className="studentSubmissionCurrent__row">
+                  <dt>Status</dt>
+                  <dd>
+                    <span className="studentStatusPill">{mySubmission.status || "submitted"}</span>
+                  </dd>
+                </div>
+              </dl>
+              {hasAnyGrade ? (
+                <p className="studentSubmissionCurrent__note">Resubmission is closed because this work has been graded.</p>
+              ) : !canResubmit ? (
+                <p className="studentSubmissionCurrent__note">The deadline has passed or resubmission is not available.</p>
+              ) : null}
+            </article>
+          ) : null}
+
+          <div className="studentSubmissionSection studentSubmissionSection--form">
+            <SubmissionForm
+              selectedProject={selectedProject}
+              selectedAssessment={selectedAssessment}
+              selectedAssessmentId={state.selectedAssessmentId}
+              fileUrl={state.fileUrl}
+              onChangeFileUrl={(value) => dispatch({ type: "setFileUrl", value })}
+              files={state.files}
+              onChangeFiles={(fileList) =>
+                dispatch({
+                  type: "setFiles",
+                  files: fileList ? Array.from(fileList).slice(0, 10) : [],
+                })
+              }
+              onSubmit={onSubmit}
+              submitting={state.submitting}
+              alreadySubmitted={Boolean(mySubmission)}
+              allowResubmit={canResubmit}
+            />
           </div>
-        )}
 
-        <div style={{ marginTop: 12 }}>
-          <SubmissionForm
-            selectedProject={selectedProject}
-            selectedAssessment={selectedAssessment}
-            selectedAssessmentId={state.selectedAssessmentId}
-            fileUrl={state.fileUrl}
-            onChangeFileUrl={(value) => dispatch({ type: "setFileUrl", value })}
-            files={state.files}
-            onChangeFiles={(fileList) =>
-              dispatch({
-                type: "setFiles",
-                files: fileList ? Array.from(fileList).slice(0, 10) : [],
-              })
-            }
-            onSubmit={onSubmit}
-            submitting={state.submitting}
-            alreadySubmitted={Boolean(mySubmission)}
-            allowResubmit={canResubmit}
-          />
+          {state.submitMsg ? (
+            <p className="studentOverviewBanner studentOverviewBanner--success studentSubmissionBanner">{state.submitMsg}</p>
+          ) : null}
         </div>
-
-        {state.submitMsg && <p className="helper">{state.submitMsg}</p>}
-      </div>
+      </section>
     </div>
   );
 };

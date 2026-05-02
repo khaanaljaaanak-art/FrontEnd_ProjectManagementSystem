@@ -7,6 +7,15 @@ import {
   updateUser,
 } from "../../services/adminService";
 
+const rolePillClass = (role) => {
+  if (role === "supervisor") return "adminListCard__pill--roleSupervisor";
+  if (role === "admin") return "adminListCard__pill--roleAdmin";
+  return "adminListCard__pill--roleStudent";
+};
+
+const formatRoleLabel = (role) =>
+  (role || "student").replace(/^\w/, (c) => c.toUpperCase());
+
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
@@ -161,8 +170,8 @@ const AdminUsersPage = () => {
         </button>
       </form>
 
-      <div className="actions" style={{ marginTop: 12 }}>
-        <label className="helper" style={{ margin: 0, display: "inline-flex", gap: 8, alignItems: "center" }}>
+      <div className="adminListCardToolbar">
+        <label>
           <input
             type="checkbox"
             checked={allSelected}
@@ -181,67 +190,92 @@ const AdminUsersPage = () => {
         </button>
       </div>
 
-      {loading && <p className="helper">Loading users…</p>}
-
-      <ul className="list" style={{ marginTop: 12 }}>
-        {users.map((user) => (
-          <li key={user._id} className="item">
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <input
-                type="checkbox"
-                checked={selectedUserIds.includes(user._id)}
-                onChange={() => toggleSelection(user._id)}
-                disabled={busy}
-                aria-label={`Select ${user.name}`}
-              />
-              <div>
-                <p className="itemTitle">{user.name}</p>
-                <p className="itemMeta">{user.email} · {user.role}</p>
-              </div>
-            </div>
-            <div className="actions">
-              {user.role !== "student" && (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => withAction(() => updateUser(user._id, { role: "student" }), "Role updated.")}
-                  disabled={busy}
-                >
-                  Set Student
-                </button>
-              )}
-              {user.role !== "supervisor" && (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => withAction(() => updateUser(user._id, { role: "supervisor" }), "Role updated.")}
-                  disabled={busy}
-                >
-                  Set Supervisor
-                </button>
-              )}
-              {user.role !== "admin" && (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => withAction(() => updateUser(user._id, { role: "admin" }), "Role updated.")}
-                  disabled={busy}
-                >
-                  Set Admin
-                </button>
-              )}
-              <button
-                type="button"
-                className="button buttonDanger"
-                onClick={() => withAction(() => deleteUser(user._id), "User deleted.")}
-                disabled={busy}
+      <div style={{ marginTop: 20 }}>
+        <h2 className="adminListCardSectionTitle">Users ({users.length})</h2>
+        {loading && <p className="helper" style={{ marginTop: 0 }}>Loading users…</p>}
+        {!loading && users.length === 0 && (
+          <p className="helper" style={{ marginTop: 0 }}>No users found. Add a user with the form above.</p>
+        )}
+        <ul className="adminListCardList" style={{ marginTop: 10 }}>
+          {users.map((user) => {
+            const isRowSelected = selectedUserIds.includes(user._id);
+            return (
+              <li
+                key={user._id}
+                className={`adminListCard${isRowSelected ? " adminListCard--selected" : ""}`}
               >
-                Remove
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+                <div className="adminListCard__body">
+                  <div className="adminListCard__top adminListCard__top--withCheck">
+                    <label className="adminListCard__check">
+                      <input
+                        type="checkbox"
+                        checked={isRowSelected}
+                        onChange={() => toggleSelection(user._id)}
+                        disabled={busy}
+                        aria-label={`Select ${user.name}`}
+                      />
+                    </label>
+                    <div className="adminListCard__topMain">
+                      <h3 className="adminListCard__title">{user.name}</h3>
+                      <div className="adminListCard__pills" aria-label="Account role">
+                        <span className={`adminListCard__pill ${rolePillClass(user.role)}`}>
+                          {formatRoleLabel(user.role)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="adminListCard__meta">
+                    <div className="adminListCard__metaRow">
+                      <p className="adminListCard__metaLabel">Email</p>
+                      <p className="adminListCard__metaValue">{user.email}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="adminListCard__footer">
+                  {user.role !== "student" && (
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => withAction(() => updateUser(user._id, { role: "student" }), "Role updated.")}
+                      disabled={busy}
+                    >
+                      Set Student
+                    </button>
+                  )}
+                  {user.role !== "supervisor" && (
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => withAction(() => updateUser(user._id, { role: "supervisor" }), "Role updated.")}
+                      disabled={busy}
+                    >
+                      Set Supervisor
+                    </button>
+                  )}
+                  {user.role !== "admin" && (
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => withAction(() => updateUser(user._id, { role: "admin" }), "Role updated.")}
+                      disabled={busy}
+                    >
+                      Set Admin
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="button buttonDanger"
+                    onClick={() => withAction(() => deleteUser(user._id), "User deleted.")}
+                    disabled={busy}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 };
