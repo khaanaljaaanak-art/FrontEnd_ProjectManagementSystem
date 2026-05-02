@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Layout from "../../components/Layout";
-import DashboardNavbar from "../../components/common/DashboardNavbar";
+import DashboardSidebar from "../../components/common/DashboardSidebar";
 
 const navItems = [
   { to: "/admin/projects", label: "Projects" },
@@ -16,9 +16,10 @@ const AdminLayoutPage = () => {
   return (
     <Layout
       title="Admin Workspace"
-      subtitle="Navigate admin operations step-by-step"
+      subtitle="Manage projects, people, and system settings from the sidebar"
+      sidebar={<DashboardSidebar items={navItems} />}
+      sidebarNavItems={navItems}
     >
-      <DashboardNavbar items={navItems} />
       <Outlet />
     </Layout>
   );

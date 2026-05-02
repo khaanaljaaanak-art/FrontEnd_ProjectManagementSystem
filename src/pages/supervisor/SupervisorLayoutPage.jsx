@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Layout from "../../components/Layout";
-import DashboardNavbar from "../../components/common/DashboardNavbar";
+import DashboardSidebar from "../../components/common/DashboardSidebar";
 
 const navItems = [
   { to: "/supervisor/grading", label: "Grading" },
@@ -13,10 +13,10 @@ const SupervisorLayoutPage = () => {
   return (
     <Layout
       title="Supervisor Workspace"
-      subtitle="Evaluate submissions, track progress, communicate, and monitor updates"
+      subtitle="Grading, student progress, and communication—pick a section to begin"
+      sidebar={<DashboardSidebar items={navItems} />}
+      sidebarNavItems={navItems}
     >
-      <DashboardNavbar items={navItems} />
-
       <Outlet />
     </Layout>
   );

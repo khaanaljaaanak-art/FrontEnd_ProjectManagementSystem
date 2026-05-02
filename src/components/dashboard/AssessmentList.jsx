@@ -9,11 +9,16 @@ const AssessmentList = ({
   onSelect,
   selectedAssessment,
   helper,
+  className = "",
+  selectId = "assessment-select",
 }) => {
-  return (  
-    <div>
-      <label className="label">Assessment</label>
+  return (
+    <div className={className || undefined}>
+      <label className="label" htmlFor={selectId}>
+        Assessment
+      </label>
       <select
+        id={selectId}
         className="select"
         value={selectedAssessmentId}
         onChange={(e) => onSelect(e.target.value)}
@@ -28,15 +33,37 @@ const AssessmentList = ({
       </select>
 
       {selectedAssessment?.deadline && (
-        <p className="helper">Deadline: {new Date(selectedAssessment.deadline).toLocaleString()}</p>
+        <p className={className ? "studentSubmissionDeadline" : "helper"}>
+          {className ? (
+            <>
+              <span className="studentSubmissionDeadline__label">Deadline</span>
+              {new Date(selectedAssessment.deadline).toLocaleString()}
+            </>
+          ) : (
+            <>Deadline: {new Date(selectedAssessment.deadline).toLocaleString()}</>
+          )}
+        </p>
       )}
 
-      {helper && <p className="helper">{helper}</p>}
-      {loading && <p className="helper">Loading assessments…</p>}
+      {helper ? (
+        <p className={className ? "studentSubmissionFieldHint" : "helper"}>{helper}</p>
+      ) : null}
+      {loading ? (
+        className ? (
+          <p className="studentOverviewStatus studentSubmissionAssess__status" role="status">
+            <span className="studentOverviewSpinner" aria-hidden />
+            Loading assessments…
+          </p>
+        ) : (
+          <p className="helper">Loading assessments…</p>
+        )
+      ) : null}
       <ErrorMessage message={error} />
 
       {!loading && !error && !disabled && assessments.length === 0 && (
-        <p className="helper">No assessments available for this project.</p>
+        <p className={className ? "studentSubmissionFieldHint" : "helper"}>
+          No assessments available for this project.
+        </p>
       )}
     </div>
   );
