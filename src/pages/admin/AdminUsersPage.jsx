@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import {
   createUser,
   deleteUser,
@@ -24,6 +25,7 @@ const AdminUsersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -90,27 +92,6 @@ const AdminUsersPage = () => {
       return;
     }
     setSelectedUserIds(users.map((user) => user._id));
-  };
-
-  const onDeleteSelected = async () => {
-    if (selectedUserIds.length === 0) return;
-
-    const selectedCount = selectedUserIds.length;
-    await withAction(async () => {
-      const results = await Promise.allSettled(
-        selectedUserIds.map((userId) => deleteUser(userId))
-      );
-
-      setSelectedUserIds([]);
-
-      const failed = results.filter((result) => result.status === "rejected");
-      if (failed.length > 0) {
-        const firstError = failed[0].reason;
-        const reason =
-          firstError?.response?.data?.message || firstError?.message || "Unknown error.";
-        throw new Error(`${failed.length}/${results.length} deletions failed. ${reason}`);
-      }
-    }, `${selectedCount} user(s) deleted.`);
   };
 
   return (
@@ -183,7 +164,13 @@ const AdminUsersPage = () => {
         <button
           type="button"
           className="button buttonDanger"
-          onClick={onDeleteSelected}
+          onClick={() =>
+            setDeleteDialog({
+              kind: "bulk",
+              ids: selectedUserIds,
+              label: `${selectedUserIds.length} user(s)`,
+            })
+          }
           disabled={busy || selectedUserIds.length === 0}
         >
           Delete Selected ({selectedUserIds.length})
@@ -265,7 +252,13 @@ const AdminUsersPage = () => {
                   <button
                     type="button"
                     className="button buttonDanger"
-                    onClick={() => withAction(() => deleteUser(user._id), "User deleted.")}
+                    onClick={() =>
+                      setDeleteDialog({
+                        kind: "single",
+                        ids: [user._id],
+                        label: user.email ? `${user.name} (${user.email})` : user.name,
+                      })
+                    }
                     disabled={busy}
                   >
                     Remove
@@ -276,6 +269,44 @@ const AdminUsersPage = () => {
           })}
         </ul>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteDialog)}
+        title="Delete user?"
+        message={
+          deleteDialog
+            ? `Are you sure you want to delete ${deleteDialog.label}? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Yes, delete"
+        cancelLabel="Cancel"
+        busy={busy}
+        onCancel={() => setDeleteDialog(null)}
+        onConfirm={async () => {
+          if (!deleteDialog?.ids?.length) return;
+          const ids = deleteDialog.ids;
+          const label = deleteDialog.label;
+          setDeleteDialog(null);
+
+          if (ids.length === 1) {
+            await withAction(() => deleteUser(ids[0]), "User deleted.");
+            setSelectedUserIds((prev) => prev.filter((id) => id !== ids[0]));
+            return;
+          }
+
+          await withAction(async () => {
+            const results = await Promise.allSettled(ids.map((userId) => deleteUser(userId)));
+            setSelectedUserIds([]);
+            const failed = results.filter((result) => result.status === "rejected");
+            if (failed.length > 0) {
+              const firstError = failed[0].reason;
+              const reason =
+                firstError?.response?.data?.message || firstError?.message || "Unknown error.";
+              throw new Error(`${failed.length}/${results.length} deletions failed. ${reason}`);
+            }
+          }, `${label} deleted.`);
+        }}
+      />
     </div>
   );
 };

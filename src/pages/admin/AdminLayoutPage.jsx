@@ -4,11 +4,10 @@ import DashboardSidebar from "../../components/common/DashboardSidebar";
 
 const navItems = [
   { to: "/admin/projects", label: "Projects" },
-  { to: "/admin/assessments", label: "Assessments" },
+  { to: "/admin/assessments/select", label: "Assessments" },
   { to: "/admin/users", label: "Users and Roles" },
   { to: "/admin/settings", label: "System Settings" },
   { to: "/admin/reports", label: "Reports and Analytics" },
-  { to: "/admin/disputes", label: "Disputes" },
   { to: "/admin/activity", label: "Activity" },
 ];
 

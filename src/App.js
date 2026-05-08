@@ -4,11 +4,11 @@ import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayoutPage from "./pages/admin/AdminLayoutPage";
 import AdminProjectsPage from "./pages/admin/AdminProjectsPage";
-import AdminAssessmentsPage from "./pages/admin/AdminAssessmentsPage";
+import AdminAssessmentProjectSelectPage from "./pages/admin/assessments/AdminAssessmentProjectSelectPage";
+import AdminAssessmentTimelinePage from "./pages/admin/assessments/AdminAssessmentTimelinePage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
-import AdminDisputesPage from "./pages/admin/AdminDisputesPage";
 import AdminActivityPage from "./pages/admin/AdminActivityPage";
 import SupervisorLayoutPage from "./pages/supervisor/SupervisorLayoutPage";
 import SupervisorGradingPage from "./pages/supervisor/SupervisorGradingPage";
@@ -40,11 +40,12 @@ function App() {
         >
           <Route index element={<Navigate to="projects" replace />} />
           <Route path="projects" element={<AdminProjectsPage />} />
-          <Route path="assessments" element={<AdminAssessmentsPage />} />
+          <Route path="assessments" element={<Navigate to="assessments/select" replace />} />
+          <Route path="assessments/select" element={<AdminAssessmentProjectSelectPage />} />
+          <Route path="assessments/:projectId/timeline" element={<AdminAssessmentTimelinePage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="reports" element={<AdminReportsPage />} />
-          <Route path="disputes" element={<AdminDisputesPage />} />
           <Route path="activity" element={<AdminActivityPage />} />
         </Route>
 
