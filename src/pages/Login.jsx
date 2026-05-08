@@ -33,61 +33,109 @@ const Login = () => {
       title="Login"
       subtitle="Sign in to access your dashboard"
     >
-      <div className="grid" style={{ maxWidth: 520, margin: "0 auto" }}>
-        <div className="card">
-          <div className="cardHeader">
-            <div>
-              <p className="cardTitle">Welcome back</p>
-              <p className="cardHint">Use your registered email and password</p>
-            </div>
-          </div>
-
-          {error && <p className="error">{error}</p>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div>
-                <label className="label">Email</label>
-                <input
-                  className="input"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="label">Password</label>
-                <input
-                  className="input"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="actions" style={{ marginTop: 14 }}>
-              <button type="submit" className="button buttonPrimary">
-                Login
-              </button>
-              <button
-                type="button"
-                className="button"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up
-              </button>
-            </div>
-
-            <p className="helper">
-              After login you’ll be redirected based on your role.
+      <div className="authShell">
+        <div className="authGrid">
+          <section className="authIntro" aria-label="Platform overview">
+            <div className="authIntro__badge">Project Management System</div>
+            <h2 className="authIntro__title">Plan. Submit. Review. Track.</h2>
+            <p className="authIntro__text">
+              A single workspace for managing projects, assessment timelines, submissions, grading, and communication.
             </p>
-          </form>
+
+            <div className="authFeatureList" role="list">
+              <div className="authFeature" role="listitem">
+                <div className="authFeature__icon" aria-hidden>
+                  ✓
+                </div>
+                <div className="authFeature__body">
+                  <p className="authFeature__title">Structured workflow</p>
+                  <p className="authFeature__text">Clear steps for project selection and assessment management.</p>
+                </div>
+              </div>
+              <div className="authFeature" role="listitem">
+                <div className="authFeature__icon" aria-hidden>
+                  ✓
+                </div>
+                <div className="authFeature__body">
+                  <p className="authFeature__title">Submission tracking</p>
+                  <p className="authFeature__text">Monitor progress signals and timeline health at a glance.</p>
+                </div>
+              </div>
+              <div className="authFeature" role="listitem">
+                <div className="authFeature__icon" aria-hidden>
+                  ✓
+                </div>
+                <div className="authFeature__body">
+                  <p className="authFeature__title">Role-based portals</p>
+                  <p className="authFeature__text">Admin, supervisor, and student dashboards with focused tools.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="authIllustration" aria-hidden>
+              <div className="authBlob authBlob--blue" />
+              <div className="authBlob authBlob--teal" />
+              <div className="authBlob authBlob--orange" />
+            </div>
+          </section>
+
+          <section className="card authCard" aria-label="Login form">
+            <div className="cardHeader">
+              <div>
+                <p className="cardTitle">Welcome back</p>
+                <p className="cardHint">Use your registered email and password</p>
+              </div>
+            </div>
+
+            {error && <p className="error">{error}</p>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="row">
+                <div>
+                  <label className="label">Email</label>
+                  <input
+                    className="input"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Password</label>
+                  <input
+                    className="input"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
+              </div>
+
+              <div className="actions" style={{ marginTop: 14 }}>
+                <button type="submit" className="button buttonPrimary">
+                  Login
+                </button>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              <p className="helper">
+                After login you’ll be redirected based on your role.
+              </p>
+            </form>
+          </section>
         </div>
       </div>
     </Layout>

@@ -8,6 +8,7 @@ import {
 } from "../../services/projectService";
 import { fetchUsers } from "../../services/adminService";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 const formatStatusLabel = (status) => {
   const raw = (status || "available").replace(/_/g, " ");
@@ -21,6 +22,7 @@ const AdminProjectsPage = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [draft, setDraft] = useState({
     title: "",
     description: "",
@@ -230,7 +232,12 @@ const AdminProjectsPage = () => {
                   <button
                     type="button"
                     className="button buttonDanger"
-                    onClick={() => withAction(() => deleteProject(project._id), "Project deleted.")}
+                    onClick={() =>
+                      setDeleteTarget({
+                        id: project._id,
+                        title: project.title,
+                      })
+                    }
                     disabled={busy}
                   >
                     Delete
@@ -241,6 +248,30 @@ const AdminProjectsPage = () => {
           })}
         </ul>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete project?"
+        message={
+          deleteTarget
+            ? `Are you sure you want to delete “${deleteTarget.title}”? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Yes, delete"
+        cancelLabel="Cancel"
+        busy={busy}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={async () => {
+          if (!deleteTarget?.id) return;
+          const id = deleteTarget.id;
+          await withAction(() => deleteProject(id), "Project deleted.");
+          setDeleteTarget(null);
+          if (selectedProjectId === id) {
+            setSelectedProjectId("");
+            setDraft({ title: "", description: "", status: "available", supervisors: [] });
+          }
+        }}
+      />
     </div>
   );
 };
