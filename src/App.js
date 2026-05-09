@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { NotificationPollerProvider } from "./context/NotificationPollerContext";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -10,6 +12,9 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminActivityPage from "./pages/admin/AdminActivityPage";
+import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage";
+import ForumListPage from "./pages/forum/ForumListPage";
+import ForumThreadPage from "./pages/forum/ForumThreadPage";
 import SupervisorLayoutPage from "./pages/supervisor/SupervisorLayoutPage";
 import SupervisorGradingPage from "./pages/supervisor/SupervisorGradingPage";
 import SupervisorStudentsPage from "./pages/supervisor/SupervisorStudentsPage";
@@ -26,7 +31,9 @@ import StudentHistoryPage from "./pages/student/StudentHistoryPage";
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <NotificationPollerProvider>
+        <Toaster position="top-right" toastOptions={{ duration: 4500 }} />
+        <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
@@ -45,8 +52,11 @@ function App() {
           <Route path="assessments/:projectId/timeline" element={<AdminAssessmentTimelinePage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
+          <Route path="forum" element={<ForumListPage />} />
+          <Route path="forum/:discussionId" element={<ForumThreadPage />} />
           <Route path="reports" element={<AdminReportsPage />} />
           <Route path="activity" element={<AdminActivityPage />} />
+          <Route path="notifications" element={<AdminNotificationsPage />} />
         </Route>
 
         <Route
@@ -61,6 +71,8 @@ function App() {
           <Route path="grading" element={<SupervisorGradingPage />} />
           <Route path="students" element={<SupervisorStudentsPage />} />
           <Route path="history" element={<SupervisorHistoryPage />} />
+          <Route path="forum" element={<ForumListPage />} />
+          <Route path="forum/:discussionId" element={<ForumThreadPage />} />
           <Route path="communication" element={<SupervisorCommunicationPage />} />
         </Route>
 
@@ -77,10 +89,13 @@ function App() {
           <Route path="submission" element={<StudentSubmissionPage />} />
           <Route path="marks" element={<StudentMarksPage />} />
           <Route path="notifications" element={<StudentNotificationsPage />} />
+          <Route path="forum" element={<ForumListPage />} />
+          <Route path="forum/:discussionId" element={<ForumThreadPage />} />
           <Route path="communication" element={<StudentCommunicationPage />} />
           <Route path="history" element={<StudentHistoryPage />} />
         </Route>
-      </Routes>
+        </Routes>
+      </NotificationPollerProvider>
     </BrowserRouter>
   );
 }

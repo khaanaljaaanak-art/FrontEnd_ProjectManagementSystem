@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import { useNotificationPoller } from "../../context/NotificationPollerContext";
 import {
-  fetchStudentNotifications,
-  markStudentNotificationRead,
-} from "../../services/studentService";
+  fetchAdminNotifications,
+  markAdminNotificationRead,
+} from "../../services/adminService";
 
 const formatNotificationKind = (type) => {
   if (!type || typeof type !== "string") return "Update";
@@ -12,9 +12,11 @@ const formatNotificationKind = (type) => {
   const map = {
     message: "Message",
     feedback_update: "Evaluation",
-    deadline: "Deadline",
-    submission: "Submission",
-    system: "System",
+    submission_submitted: "Submission",
+    submission_graded: "Graded",
+    deadline_update: "Deadline",
+    admin_project_pending: "Project approval",
+    admin_dispute_opened: "Dispute",
   };
   if (map[normalized]) return map[normalized];
   return normalized
@@ -29,7 +31,7 @@ const typeSlug = (type) => {
   return type.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "default";
 };
 
-const StudentNotificationsPage = () => {
+const AdminNotificationsPage = () => {
   const { refreshUnreadSummary } = useNotificationPoller();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ const StudentNotificationsPage = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchStudentNotifications();
+      const data = await fetchAdminNotifications();
       setNotifications(Array.isArray(data) ? data : []);
     } catch (_e) {
       setError("Failed to load notifications.");
@@ -55,7 +57,7 @@ const StudentNotificationsPage = () => {
 
   const markRead = async (notificationId) => {
     try {
-      const updated = await markStudentNotificationRead(notificationId);
+      const updated = await markAdminNotificationRead(notificationId);
       setNotifications((prev) =>
         prev.map((item) => (item._id === updated._id ? updated : item))
       );
@@ -66,14 +68,14 @@ const StudentNotificationsPage = () => {
   };
 
   return (
-    <section className="card studentOverviewCard studentNotifyPage" aria-labelledby="student-notify-heading">
+    <section className="card studentOverviewCard studentNotifyPage" aria-labelledby="admin-notify-heading">
       <header className="studentOverviewCard__header studentOverviewCard__header--split">
         <div>
           <p className="studentOverviewCard__eyebrow">Inbox</p>
-          <h2 id="student-notify-heading" className="cardTitle">
+          <h2 id="admin-notify-heading" className="cardTitle">
             Notifications
           </h2>
-          <p className="cardHint">Deadlines, messages from supervisors, and grading updates in one place.</p>
+          <p className="cardHint">Pending approvals, disputes, and system alerts for administrators.</p>
         </div>
         <button type="button" className="button buttonRefresh" onClick={load} disabled={loading}>
           Refresh list
@@ -94,8 +96,7 @@ const StudentNotificationsPage = () => {
           <div className="studentOverviewEmpty">
             <p className="studentOverviewEmpty__title">You are all caught up</p>
             <p className="studentOverviewEmpty__text">
-              New alerts will appear here when supervisors message you, when deadlines change, or when submissions are
-              graded.
+              Alerts appear here when projects need approval or when disputes are filed.
             </p>
           </div>
         )}
@@ -153,4 +154,4 @@ const StudentNotificationsPage = () => {
   );
 };
 
-export default StudentNotificationsPage;
+export default AdminNotificationsPage;

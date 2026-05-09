@@ -51,3 +51,18 @@ export const resolveDispute = async (disputeId, resolutionNote) => {
   });
   return response.data;
 };
+
+export const fetchAdminNotifications = async () => {
+  const response = await api.get("/admin/notifications");
+  return response.data;
+};
+
+export const fetchAdminUnreadSummary = async () => {
+  const response = await api.get("/admin/notifications/unread-summary");
+  return response.data;
+};
+
+export const markAdminNotificationRead = async (notificationId) => {
+  const response = await api.put(`/admin/notifications/${notificationId}/read`);
+  return response.data;
+};

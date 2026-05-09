@@ -30,6 +30,11 @@ export const fetchStudentNotifications = async () => {
   return response.data;
 };
 
+export const fetchStudentUnreadSummary = async () => {
+  const response = await api.get("/student/notifications/unread-summary");
+  return response.data;
+};
+
 export const markStudentNotificationRead = async (notificationId) => {
   const response = await api.put(`/student/notifications/${notificationId}/read`);
   return response.data;

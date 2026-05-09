@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ClipboardList, FileCheck2, FolderKanban } from "lucide-react";
 import { useProjects } from "../../context/ProjectContext";
 import { useAssessments } from "../../hooks/useAssessments";
 import { useSubmissions } from "../../hooks/useSubmissions";
@@ -104,41 +105,89 @@ const SupervisorGradingPage = () => {
 
   return (
     <div className="grid grid2 supervisorGradingGrid">
-      <section className="card studentOverviewCard" aria-labelledby="sup-grade-scope-heading">
+      <section
+        className="card studentOverviewCard supervisorSetupCard"
+        aria-labelledby="sup-grade-scope-heading"
+      >
         <header className="studentOverviewCard__header">
-          <div>
-            <p className="studentOverviewCard__eyebrow">Setup</p>
-            <h2 id="sup-grade-scope-heading" className="cardTitle">
-              Evaluation scope
-            </h2>
-            <p className="cardHint">Select the project and assessment you are marking. Submissions and the rubric load for that task.</p>
+          <div className="supervisorSetupCard__intro">
+            <span className="supervisorSetupCard__introIcon" aria-hidden>
+              <ClipboardList size={22} strokeWidth={2} />
+            </span>
+            <div>
+              <p className="studentOverviewCard__eyebrow">Setup</p>
+              <h2 id="sup-grade-scope-heading" className="cardTitle">
+                Evaluation scope
+              </h2>
+              <p className="cardHint supervisorSetupCard__hint">
+                Work through both steps: choose a project, then the assessment. The rubric and submission queue update
+                automatically.
+              </p>
+            </div>
           </div>
         </header>
 
         <div className="studentOverviewCard__body">
-          <div className="supervisorPickColumn">
-            <ProjectSelector
-              embedded
-              selectedProjectId={selectedProjectId}
-              onSelect={(project) => {
-                setSelectedProjectId(project?._id || "");
-                setSelectedAssessmentId("");
-                setRubric(null);
-              }}
-            />
+          <ol className="supervisorSetupSteps">
+            <li className="supervisorSetupStep">
+              <div className="supervisorSetupStep__rail" aria-hidden>
+                <span className="supervisorSetupStep__badge">
+                  <FolderKanban size={18} strokeWidth={2} />
+                </span>
+              </div>
+              <div className="supervisorSetupStep__main">
+                <div className="supervisorSetupStep__heading">
+                  <span className="supervisorSetupStep__title">Choose project</span>
+                  <span className="supervisorSetupStep__meta">Step 1</span>
+                </div>
+                <p className="supervisorSetupStep__text">Select the module or cohort you are marking.</p>
+                <div className="supervisorSetupStep__panel">
+                  <ProjectSelector
+                    embedded
+                    selectedProjectId={selectedProjectId}
+                    onSelect={(project) => {
+                      setSelectedProjectId(project?._id || "");
+                      setSelectedAssessmentId("");
+                      setRubric(null);
+                    }}
+                  />
+                </div>
+              </div>
+            </li>
 
-            <AssessmentList
-              selectId="grading-assessment-select"
-              assessments={assessments}
-              loading={loadingAssessments}
-              error={assessmentError}
-              disabled={!selectedProject?._id}
-              selectedAssessmentId={selectedAssessmentId}
-              onSelect={selectAssessment}
-              selectedAssessment={selectedAssessment}
-              helper={!selectedProject?._id ? "Select a project first." : ""}
-            />
-          </div>
+            <li
+              className={`supervisorSetupStep${selectedProject?._id ? "" : " supervisorSetupStep--pending"}`}
+            >
+              <div className="supervisorSetupStep__rail" aria-hidden>
+                <span className="supervisorSetupStep__badge supervisorSetupStep__badge--secondary">
+                  <FileCheck2 size={18} strokeWidth={2} />
+                </span>
+              </div>
+              <div className="supervisorSetupStep__main">
+                <div className="supervisorSetupStep__heading">
+                  <span className="supervisorSetupStep__title">Choose assessment</span>
+                  <span className="supervisorSetupStep__meta">Step 2</span>
+                </div>
+                <p className="supervisorSetupStep__text">
+                  Pick the task to load its rubric and student submissions.
+                </p>
+                <div className="supervisorSetupStep__panel supervisorSetupStep__panel--tight">
+                  <AssessmentList
+                    selectId="grading-assessment-select"
+                    assessments={assessments}
+                    loading={loadingAssessments}
+                    error={assessmentError}
+                    disabled={!selectedProject?._id}
+                    selectedAssessmentId={selectedAssessmentId}
+                    onSelect={selectAssessment}
+                    selectedAssessment={selectedAssessment}
+                    helper={!selectedProject?._id ? "Select a project in step 1 first." : ""}
+                    visibleLabel={false}
+                  />
+                </div>
+              </div>
+            </li>
+          </ol>
         </div>
       </section>
 
@@ -164,7 +213,7 @@ const SupervisorGradingPage = () => {
           {!selectedAssessmentId && !rubricLoading ? (
             <div className="studentCommThreadPlaceholder studentCommThreadPlaceholder--subtle">
               <p className="studentCommThreadPlaceholder__title">No assessment selected</p>
-              <p className="studentCommThreadPlaceholder__text">Choose an assessment on the left to load its rubric.</p>
+              <p className="studentCommThreadPlaceholder__text">Choose an assessment in setup to load its rubric.</p>
             </div>
           ) : null}
 

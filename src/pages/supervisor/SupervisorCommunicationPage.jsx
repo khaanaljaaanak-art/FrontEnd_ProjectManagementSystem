@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { useNotificationPoller } from "../../context/NotificationPollerContext";
 import {
   fetchAssignedStudentsProgress,
   fetchConversation,
@@ -31,6 +33,8 @@ const typeSlug = (type) => {
 };
 
 const SupervisorCommunicationPage = () => {
+  const { hash } = useLocation();
+  const { refreshUnreadSummary } = useNotificationPoller();
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [conversation, setConversation] = useState([]);
@@ -72,8 +76,9 @@ const SupervisorCommunicationPage = () => {
       setError("Failed to load communication workspace.");
     } finally {
       setLoading(false);
+      void refreshUnreadSummary();
     }
-  }, []);
+  }, [refreshUnreadSummary]);
 
   const loadConversation = useCallback(async (studentId) => {
     if (!studentId) {
@@ -125,17 +130,32 @@ const SupervisorCommunicationPage = () => {
       setNotifications((prev) =>
         prev.map((item) => (item._id === updated._id ? updated : item))
       );
+      await refreshUnreadSummary();
     } catch (_e) {
       setError("Failed to mark notification as read.");
     }
   };
+
+  useEffect(() => {
+    if (hash !== "#supervisor-notifications") return;
+    const el = document.getElementById("supervisor-notifications");
+    if (el) {
+      window.requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [hash]);
 
   return (
     <>
       <ErrorMessage message={error} />
 
       <div className="grid grid2 supervisorCommunicationGrid">
-        <section className="card studentOverviewCard studentNotifyPage" aria-labelledby="sup-notify-heading">
+        <section
+          id="supervisor-notifications"
+          className="card studentOverviewCard studentNotifyPage"
+          aria-labelledby="sup-notify-heading"
+        >
         <header className="studentOverviewCard__header studentOverviewCard__header--split">
           <div>
             <p className="studentOverviewCard__eyebrow">Inbox</p>

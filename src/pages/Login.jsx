@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LogIn, Upload, UserPlus, UsersRound, Workflow } from "lucide-react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
@@ -45,7 +46,7 @@ const Login = () => {
             <div className="authFeatureList" role="list">
               <div className="authFeature" role="listitem">
                 <div className="authFeature__icon" aria-hidden>
-                  ✓
+                  <Workflow size={20} strokeWidth={2} />
                 </div>
                 <div className="authFeature__body">
                   <p className="authFeature__title">Structured workflow</p>
@@ -54,7 +55,7 @@ const Login = () => {
               </div>
               <div className="authFeature" role="listitem">
                 <div className="authFeature__icon" aria-hidden>
-                  ✓
+                  <Upload size={20} strokeWidth={2} />
                 </div>
                 <div className="authFeature__body">
                   <p className="authFeature__title">Submission tracking</p>
@@ -63,7 +64,7 @@ const Login = () => {
               </div>
               <div className="authFeature" role="listitem">
                 <div className="authFeature__icon" aria-hidden>
-                  ✓
+                  <UsersRound size={20} strokeWidth={2} />
                 </div>
                 <div className="authFeature__body">
                   <p className="authFeature__title">Role-based portals</p>
@@ -119,14 +120,16 @@ const Login = () => {
               </div>
 
               <div className="actions" style={{ marginTop: 14 }}>
-                <button type="submit" className="button buttonPrimary">
+                <button type="submit" className="button buttonPrimary buttonInlineIcon">
+                  <LogIn size={18} strokeWidth={2} aria-hidden />
                   Login
                 </button>
                 <button
                   type="button"
-                  className="button"
+                  className="button buttonInlineIcon"
                   onClick={() => navigate("/signup")}
                 >
+                  <UserPlus size={18} strokeWidth={2} aria-hidden />
                   Sign Up
                 </button>
               </div>

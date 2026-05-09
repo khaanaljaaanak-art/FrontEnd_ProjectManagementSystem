@@ -1,14 +1,26 @@
 import { Outlet } from "react-router-dom";
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  ClipboardList,
+  FolderKanban,
+  MessagesSquare,
+  Settings,
+  Users,
+} from "lucide-react";
 import Layout from "../../components/Layout";
 import DashboardSidebar from "../../components/common/DashboardSidebar";
 
 const navItems = [
-  { to: "/admin/projects", label: "Projects" },
-  { to: "/admin/assessments/select", label: "Assessments" },
-  { to: "/admin/users", label: "Users and Roles" },
-  { to: "/admin/settings", label: "System Settings" },
-  { to: "/admin/reports", label: "Reports and Analytics" },
-  { to: "/admin/activity", label: "Activity" },
+  { to: "/admin/projects", label: "Projects", icon: FolderKanban },
+  { to: "/admin/assessments/select", label: "Assessments", icon: ClipboardList },
+  { to: "/admin/users", label: "Users and Roles", icon: Users },
+  { to: "/admin/settings", label: "System Settings", icon: Settings },
+  { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/forum", label: "Forum", icon: MessagesSquare },
+  { to: "/admin/reports", label: "Reports and Analytics", icon: BarChart3 },
+  { to: "/admin/activity", label: "Activity", icon: Activity },
 ];
 
 const AdminLayoutPage = () => {

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { FileCheck2, FolderKanban, GitBranch, History } from "lucide-react";
 import { useProjects } from "../../context/ProjectContext";
 import { useAssessments } from "../../hooks/useAssessments";
 import ProjectSelector from "../../components/dashboard/ProjectSelector";
@@ -42,10 +43,20 @@ const SupervisorHistoryPage = () => {
     error: assessmentsError,
   } = useAssessments(selectedProjectId);
 
+  const selectedAssessment = useMemo(
+    () => assessments.find((assessment) => assessment._id === selectedAssessmentId) || null,
+    [assessments, selectedAssessmentId]
+  );
+
   const loadHistory = async (assessmentId) => {
     setSelectedAssessmentId(assessmentId);
-    setLoading(true);
     setError("");
+    if (!assessmentId) {
+      setHistoryRows([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     try {
       const data = await fetchSubmissionHistory(assessmentId);
       setHistoryRows(Array.isArray(data) ? data : []);
@@ -58,55 +69,108 @@ const SupervisorHistoryPage = () => {
   };
 
   return (
-    <div className="grid grid2">
-      <section className="card studentOverviewCard" aria-labelledby="sup-history-scope-heading">
+    <div className="grid grid2 supervisorHistoryGrid">
+      <section
+        className="card studentOverviewCard supervisorSetupCard supervisorHistoryScopeCard"
+        aria-labelledby="sup-history-scope-heading"
+      >
         <header className="studentOverviewCard__header">
-          <div>
-            <p className="studentOverviewCard__eyebrow">Scope</p>
-            <h2 id="sup-history-scope-heading" className="cardTitle">
-              Submission history
-            </h2>
-            <p className="cardHint">Pick a project and assessment to load every student revision for that task.</p>
+          <div className="supervisorSetupCard__intro">
+            <span className="supervisorSetupCard__introIcon" aria-hidden>
+              <History size={22} strokeWidth={2} />
+            </span>
+            <div>
+              <p className="studentOverviewCard__eyebrow">Scope</p>
+              <h2 id="sup-history-scope-heading" className="cardTitle">
+                Submission history
+              </h2>
+              <p className="cardHint supervisorSetupCard__hint">
+                Choose a project, then an assessment. Revision timelines load for every student on that task.
+              </p>
+            </div>
           </div>
         </header>
 
         <div className="studentOverviewCard__body">
-          <div className="supervisorPickColumn">
-            <ProjectSelector
-              embedded
-              selectedProjectId={selectedProjectId}
-              onSelect={(project) => {
-                setSelectedProjectId(project?._id || "");
-                setSelectedAssessmentId("");
-                setHistoryRows([]);
-              }}
-            />
+          <ol className="supervisorSetupSteps">
+            <li className="supervisorSetupStep">
+              <div className="supervisorSetupStep__rail" aria-hidden>
+                <span className="supervisorSetupStep__badge">
+                  <FolderKanban size={18} strokeWidth={2} />
+                </span>
+              </div>
+              <div className="supervisorSetupStep__main">
+                <div className="supervisorSetupStep__heading">
+                  <span className="supervisorSetupStep__title">Choose project</span>
+                  <span className="supervisorSetupStep__meta">Step 1</span>
+                </div>
+                <p className="supervisorSetupStep__text">Select the cohort or module whose submissions you are reviewing.</p>
+                <div className="supervisorSetupStep__panel">
+                  <ProjectSelector
+                    embedded
+                    selectedProjectId={selectedProjectId}
+                    onSelect={(project) => {
+                      setSelectedProjectId(project?._id || "");
+                      setSelectedAssessmentId("");
+                      setHistoryRows([]);
+                    }}
+                  />
+                </div>
+              </div>
+            </li>
 
-            <AssessmentList
-              selectId="history-assessment-select"
-              assessments={assessments}
-              loading={assessmentsLoading}
-              error={assessmentsError}
-              disabled={!selectedProject?._id}
-              selectedAssessmentId={selectedAssessmentId}
-              onSelect={loadHistory}
-              selectedAssessment={
-                assessments.find((assessment) => assessment._id === selectedAssessmentId) || null
-              }
-              helper={!selectedProject?._id ? "Select a project first." : ""}
-            />
-          </div>
+            <li
+              className={`supervisorSetupStep${selectedProject?._id ? "" : " supervisorSetupStep--pending"}`}
+            >
+              <div className="supervisorSetupStep__rail" aria-hidden>
+                <span className="supervisorSetupStep__badge supervisorSetupStep__badge--secondary">
+                  <FileCheck2 size={18} strokeWidth={2} />
+                </span>
+              </div>
+              <div className="supervisorSetupStep__main">
+                <div className="supervisorSetupStep__heading">
+                  <span className="supervisorSetupStep__title">Choose assessment</span>
+                  <span className="supervisorSetupStep__meta">Step 2</span>
+                </div>
+                <p className="supervisorSetupStep__text">Pick the task to load revision rows for each student.</p>
+                <div className="supervisorSetupStep__panel supervisorSetupStep__panel--tight">
+                  <AssessmentList
+                    selectId="history-assessment-select"
+                    assessments={assessments}
+                    loading={assessmentsLoading}
+                    error={assessmentsError}
+                    disabled={!selectedProject?._id}
+                    selectedAssessmentId={selectedAssessmentId}
+                    onSelect={loadHistory}
+                    selectedAssessment={selectedAssessment}
+                    helper={!selectedProject?._id ? "Select a project in step 1 first." : ""}
+                    visibleLabel={false}
+                  />
+                </div>
+              </div>
+            </li>
+          </ol>
         </div>
       </section>
 
-      <section className="card studentOverviewCard supervisorHistoryTimeline" aria-labelledby="sup-history-timeline-heading">
+      <section
+        className="card studentOverviewCard supervisorHistoryTimeline supervisorHistoryTimelineCard"
+        aria-labelledby="sup-history-timeline-heading"
+      >
         <header className="studentOverviewCard__header">
-          <div>
-            <p className="studentOverviewCard__eyebrow">Timeline</p>
-            <h2 id="sup-history-timeline-heading" className="cardTitle">
-              Revisions by student
-            </h2>
-            <p className="cardHint">Each card is one submission; the table lists version history and who changed marks or feedback.</p>
+          <div className="supervisorSetupCard__intro">
+            <span className="supervisorSetupCard__introIcon supervisorHistoryTimelineCard__icon" aria-hidden>
+              <GitBranch size={22} strokeWidth={2} />
+            </span>
+            <div>
+              <p className="studentOverviewCard__eyebrow">Timeline</p>
+              <h2 id="sup-history-timeline-heading" className="cardTitle">
+                Revisions by student
+              </h2>
+              <p className="cardHint supervisorSetupCard__hint">
+                Each card is one submission; the table lists version history and who changed marks or feedback.
+              </p>
+            </div>
           </div>
         </header>
 
@@ -132,7 +196,9 @@ const SupervisorHistoryPage = () => {
           {!loading && !selectedAssessmentId ? (
             <div className="studentCommThreadPlaceholder studentCommThreadPlaceholder--subtle">
               <p className="studentCommThreadPlaceholder__title">Choose an assessment</p>
-              <p className="studentCommThreadPlaceholder__text">Select a project and an assessment on the left to load revision data.</p>
+              <p className="studentCommThreadPlaceholder__text">
+                Select a project and an assessment in scope to load revision data.
+              </p>
             </div>
           ) : null}
 
