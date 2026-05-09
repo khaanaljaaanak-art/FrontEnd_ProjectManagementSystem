@@ -36,6 +36,19 @@
   box-sizing: border-box;
 }
 
+/* Screen-reader only — keeps controls labeled when UI hides visible labels */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html,
 body {
   height: 100%;
@@ -788,6 +801,13 @@ a {
   background: rgba(185, 28, 28, 0.12);
 }
 
+.buttonInlineIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .helper {
   margin: 10px 0 0;
   color: var(--muted);
@@ -1072,6 +1092,168 @@ a {
   gap: 10px;
 }
 
+.adminListCard__body--withGlyph {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.adminListCard__glyph {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.09);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+}
+
+.adminListCard__inner {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adminListCard__metaLabel--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.adminListCard__metaIco {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* Admin — projects page */
+.adminProjectsPage {
+  max-width: 1100px;
+}
+
+.adminProjectsFormCard__hint {
+  max-width: 62ch;
+}
+
+.adminProjectsFormCard__icon {
+  color: var(--btn-blue);
+  background: linear-gradient(145deg, rgba(21, 66, 163, 0.14), rgba(13, 148, 136, 0.06));
+  border-color: rgba(21, 66, 163, 0.28);
+}
+
+.adminProjectsBanner {
+  margin: 0 0 14px;
+}
+
+.adminProjectsEditingBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(21, 66, 163, 0.22);
+  background: rgba(21, 66, 163, 0.06);
+}
+
+.adminProjectsEditingBar__text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminProjectsEditingBar__clear {
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: 10px;
+}
+
+.adminProjectsForm {
+  display: grid;
+  gap: 18px;
+}
+
+.adminProjectsReq {
+  color: var(--btn-orange-text);
+  font-weight: 800;
+}
+
+.adminProjectsForm__grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 880px) {
+  .adminProjectsForm__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    align-items: start;
+  }
+}
+
+.adminProjectsFieldPanel {
+  padding: 14px 16px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.adminProjectsMultiSelect {
+  min-height: 120px;
+  width: 100%;
+}
+
+.adminProjectsFieldHint {
+  margin-top: 8px;
+}
+
+.adminProjectsField--narrow {
+  max-width: 100%;
+}
+
+@media (min-width: 880px) {
+  .adminProjectsField--narrow {
+    max-width: 440px;
+  }
+}
+
+.adminProjectsFormActions {
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+}
+
+.adminProjectsCatalogHead__icon {
+  color: var(--accent);
+  background: linear-gradient(145deg, rgba(194, 65, 12, 0.14), rgba(13, 148, 136, 0.07));
+  border-color: rgba(194, 65, 12, 0.24);
+}
+
+.adminProjectsCatalogBody {
+  padding-top: 4px;
+}
+
+.adminProjectsCatalogScroll {
+  max-height: min(52vh, 520px);
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -4px;
+}
+
+.adminProjectsEmpty {
+  margin-top: 4px;
+}
+
 .skeletonList {
   display: grid;
   gap: 10px;
@@ -1211,12 +1393,25 @@ a {
   line-height: 1.35;
 }
 
+.dashboardSidebarBrandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboardSidebarBrandIcon {
+  flex-shrink: 0;
+  color: var(--accent-2, #0d9488);
+}
+
 .dashboardSidebarBrandSubtitle {
   margin: 0;
   font-size: 17px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.25;
+  min-width: 0;
 }
 
 .dashboardSidebarBody {
@@ -1246,7 +1441,9 @@ a {
 }
 
 .dashboardSidebarLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
   border: 1px solid transparent;
   background: transparent;
@@ -1257,6 +1454,19 @@ a {
   font-size: 14px;
   line-height: 1.35;
   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboardSidebarLinkIcon {
+  flex-shrink: 0;
+  opacity: 0.72;
+}
+
+.dashboardSidebarLink.active .dashboardSidebarLinkIcon {
+  opacity: 1;
+}
+
+.dashboardSidebarLinkLabel {
+  min-width: 0;
 }
 
 .dashboardSidebarLink:hover {
@@ -1328,6 +1538,66 @@ a {
   white-space: nowrap;
 }
 
+.dashboardTopBarActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.notificationBell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.notificationBell:hover {
+  background: var(--surface-2);
+}
+
+.notificationBell:focus-visible {
+  outline: 2px solid var(--ring, #0d9488);
+  outline-offset: 2px;
+}
+
+.notificationBell__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBell__badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 22px;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(165deg, #f87171 0%, #dc2626 55%, #b91c1c 100%);
+  border-radius: 999px;
+  border: 2px solid var(--surface, #fff);
+  box-sizing: border-box;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(220, 38, 38, 0.35);
+  pointer-events: none;
+}
+
 .dashboardScrollMain {
   flex: 1;
   min-height: 0;
@@ -1389,6 +1659,7 @@ a {
   .dashboardSidebarLink {
     flex: 1 1 auto;
     min-width: min(140px, 100%);
+    justify-content: center;
     text-align: center;
     padding: 10px 12px;
   }
@@ -2316,6 +2587,165 @@ a {
   gap: 16px;
 }
 
+/* Supervisor — grading setup card (scoped workflow) */
+.supervisorSetupCard__intro {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.supervisorSetupCard__introIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f766e;
+  background: linear-gradient(145deg, rgba(13, 148, 136, 0.14), rgba(194, 65, 12, 0.06));
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.supervisorSetupCard__hint {
+  max-width: 52ch;
+}
+
+.supervisorSetupSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.supervisorSetupStep {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  padding-bottom: 20px;
+}
+
+.supervisorSetupStep:last-child {
+  padding-bottom: 0;
+}
+
+.supervisorSetupStep__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.supervisorSetupStep__rail::after {
+  content: "";
+  flex: 1;
+  width: 2px;
+  min-height: 12px;
+  margin-top: 10px;
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.35), var(--border));
+  border-radius: 999px;
+}
+
+.supervisorSetupStep:last-child .supervisorSetupStep__rail::after {
+  display: none;
+}
+
+.supervisorSetupStep__badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.11);
+  border: 1px solid rgba(13, 148, 136, 0.28);
+}
+
+.supervisorSetupStep__badge--secondary {
+  color: var(--accent);
+  background: rgba(194, 65, 12, 0.08);
+  border-color: rgba(194, 65, 12, 0.22);
+}
+
+.supervisorSetupStep--pending .supervisorSetupStep__badge--secondary {
+  color: var(--muted);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.supervisorSetupStep__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.supervisorSetupStep__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.supervisorSetupStep__title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.supervisorSetupStep__meta {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.supervisorSetupStep--pending .supervisorSetupStep__meta {
+  color: var(--muted);
+}
+
+.supervisorSetupStep__text {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.supervisorSetupStep__panel {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 14px 14px 16px;
+}
+
+.supervisorSetupStep__panel--tight {
+  padding-top: 12px;
+}
+
+.supervisorSetupStep .studentSubmitProjectEmbed {
+  margin: 0;
+}
+
+.supervisorSetupStep .studentSubmitProjectList {
+  gap: 10px;
+}
+
+.supervisorSetupStep .studentSubmitProjectRow {
+  background: var(--surface);
+}
+
+.supervisorSetupStep--pending .supervisorSetupStep__panel {
+  opacity: 0.92;
+}
+
 /* Student submission — project picker + portal */
 .studentSubmitProjectEmbed__bar {
   display: flex;
@@ -3011,6 +3441,17 @@ a {
   white-space: nowrap;
 }
 
+/* Supervisor — history page grid */
+.supervisorHistoryGrid {
+  align-items: start;
+}
+
+.supervisorHistoryTimelineCard__icon {
+  color: var(--accent);
+  background: linear-gradient(145deg, rgba(194, 65, 12, 0.14), rgba(13, 148, 136, 0.07));
+  border-color: rgba(194, 65, 12, 0.24);
+}
+
 /* Supervisor — submission history (timeline column) */
 .supervisorHistoryTimeline .studentOverviewCard__body {
   min-height: 120px;
@@ -3031,6 +3472,669 @@ a {
 .supervisorCommunicationGrid .studentNotifyPage {
   max-width: none;
   margin: 0;
+}
+
+/* Forum */
+@keyframes forumIconSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.forumIconSpin {
+  animation: forumIconSpin 0.85s linear infinite;
+}
+
+.adminActivityCard__icon {
+  color: var(--btn-blue);
+  background: linear-gradient(145deg, rgba(21, 66, 163, 0.14), rgba(13, 148, 136, 0.06));
+  border-color: rgba(21, 66, 163, 0.28);
+}
+
+.adminActivityCard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.adminActivityCard__body {
+  display: grid;
+  gap: 14px;
+}
+
+.adminActivityTableWrap {
+  max-height: min(52vh, 520px);
+}
+
+.adminActivityTable th:nth-child(1) {
+  width: 44%;
+}
+
+.adminActivityAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.adminActivityAction__ico {
+  flex-shrink: 0;
+  color: #0f766e;
+}
+
+.adminActivityAction__text {
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.adminActivityActor {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.adminActivityActor__ico {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.adminActivityTime {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.adminActivityChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.adminActivityChip--admin {
+  border-color: rgba(235, 106, 40, 0.4);
+  background: rgba(235, 106, 40, 0.12);
+  color: var(--btn-orange-text);
+}
+
+.adminActivityChip--supervisor {
+  border-color: rgba(21, 66, 163, 0.35);
+  background: rgba(21, 66, 163, 0.1);
+  color: var(--btn-blue);
+}
+
+.adminActivityChip--student {
+  border-color: rgba(13, 148, 136, 0.35);
+  background: rgba(13, 148, 136, 0.1);
+  color: #0f766e;
+}
+
+.adminActivityChip--system {
+  border-color: rgba(90, 107, 125, 0.25);
+  background: rgba(90, 107, 125, 0.08);
+  color: var(--muted);
+}
+
+.forumHero__intro {
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.forumComposer__intro,
+.forumFeed__intro,
+.forumReplies__intro {
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.forumToolbar__labelIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.forumComposer__leadIcon {
+  color: var(--btn-blue);
+  background: linear-gradient(145deg, rgba(21, 66, 163, 0.12), rgba(13, 148, 136, 0.05));
+  border-color: rgba(21, 66, 163, 0.28);
+}
+
+.forumFeed__leadIcon {
+  color: var(--accent);
+  background: linear-gradient(145deg, rgba(194, 65, 12, 0.14), rgba(13, 148, 136, 0.07));
+  border-color: rgba(194, 65, 12, 0.24);
+}
+
+.forumReplies__leadIcon {
+  color: #0f766e;
+  background: linear-gradient(145deg, rgba(13, 148, 136, 0.14), rgba(21, 66, 163, 0.06));
+  border-color: rgba(13, 148, 136, 0.28);
+}
+
+.forumThread__titleIntro {
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.forumThread__titleIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+}
+
+.forumThread__titleBlock {
+  min-width: 0;
+}
+
+.forumShell {
+  gap: 18px;
+}
+
+.forumHero {
+  padding: 18px 18px 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(13, 148, 136, 0.04) 100%);
+}
+
+.forumHero__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.forumHero__eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.forumHero__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.forumHero__hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 70ch;
+}
+
+.forumToolbar {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  align-items: end;
+}
+
+@media (min-width: 860px) {
+  .forumToolbar {
+    grid-template-columns: 1.2fr 0.45fr auto;
+  }
+}
+
+.forumToolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.forumComposer {
+  padding: 0;
+  overflow: hidden;
+}
+
+.forumComposer__head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.forumComposer__eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--btn-blue);
+}
+
+.forumComposer__hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 74ch;
+}
+
+.forumComposer__form {
+  padding: 16px 20px 20px;
+}
+
+.forumFeed {
+  padding: 0;
+  overflow: hidden;
+}
+
+.forumFeed__head {
+  margin: 0;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+}
+
+.forumFeed__body {
+  padding: 16px 18px 20px;
+}
+
+.forumPager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.forumPager__meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.forumList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.forumCard {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  padding: 16px 16px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.forumCard__glyph {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.09);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+}
+
+.forumCard__main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.forumCard:hover {
+  border-color: rgba(13, 148, 136, 0.35);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.forumCard__titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.forumCard__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.forumCard__excerpt {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.forumCard__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.forumChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.forumChip--pinned {
+  border-color: rgba(21, 66, 163, 0.35);
+  background: rgba(21, 66, 163, 0.08);
+  color: var(--btn-blue);
+}
+
+.forumChip--locked {
+  border-color: rgba(185, 28, 28, 0.28);
+  background: rgba(185, 28, 28, 0.08);
+  color: var(--danger);
+}
+
+.forumChip--role {
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.forumChip--role-admin {
+  border-color: rgba(235, 106, 40, 0.45);
+  background: rgba(235, 106, 40, 0.12);
+  color: var(--btn-orange-text);
+}
+
+.forumChip--role-supervisor {
+  border-color: rgba(21, 66, 163, 0.38);
+  background: rgba(21, 66, 163, 0.1);
+  color: var(--btn-blue);
+}
+
+.forumChip--role-student {
+  border-color: rgba(13, 148, 136, 0.35);
+  background: rgba(13, 148, 136, 0.1);
+  color: #0f766e;
+}
+
+.forumCard__meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 860px) {
+  .forumCard__meta {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+  }
+}
+
+.forumMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.forumMeta--right {
+  align-items: flex-start;
+}
+
+@media (min-width: 860px) {
+  .forumMeta--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.forumMeta__label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.forumMeta__value {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.forumThread {
+  padding: 0;
+  overflow: hidden;
+}
+
+.forumThread__head {
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.forumThread__headLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.forumBackBtn {
+  flex-shrink: 0;
+}
+
+.forumThread__eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.forumThread__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.forumThread__metaRow {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.forumThread__meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.forumThread__headRight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.forumAdminActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.forumThread__body {
+  padding: 18px 20px 20px;
+}
+
+.forumThread__content {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.forumThread__edit {
+  padding: 16px 20px 20px;
+}
+
+.forumReplies {
+  padding: 0;
+  overflow: hidden;
+}
+
+.forumReplies__head {
+  margin: 0;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+}
+
+.forumReplies__body {
+  padding: 16px 18px 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.forumReplyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.forumReply {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  padding: 14px 14px 12px;
+}
+
+.forumReply__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forumReply__author {
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-right: 6px;
+}
+
+.forumReply__time {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.forumReply__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: 12px;
+}
+
+.forumMiniBtn {
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.forumReply__body {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.forumReply__edit {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.forumReplyComposer {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.forumLockedHint {
+  margin: 10px 0 0;
 }
 
 /* Supervisor — grading */

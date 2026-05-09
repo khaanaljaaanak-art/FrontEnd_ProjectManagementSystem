@@ -22,6 +22,11 @@ export const fetchSupervisorNotifications = async () => {
   return response.data;
 };
 
+export const fetchSupervisorUnreadSummary = async () => {
+  const response = await api.get("/supervisor/notifications/unread-summary");
+  return response.data;
+};
+
 export const markSupervisorNotificationAsRead = async (notificationId) => {
   const response = await api.put(`/supervisor/notifications/${notificationId}/read`);
   return response.data;

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
@@ -112,16 +113,18 @@ const Signup = () => {
             <div className="actions" style={{ marginTop: 14 }}>
               <button
                 type="submit"
-                className="button buttonPrimary"
+                className="button buttonPrimary buttonInlineIcon"
                 disabled={submitting}
               >
+                {!submitting ? <UserPlus size={18} strokeWidth={2} aria-hidden /> : null}
                 {submitting ? "Creating…" : "Create Account"}
               </button>
               <button
                 type="button"
-                className="button"
+                className="button buttonInlineIcon"
                 onClick={() => navigate("/")}
               >
+                <ArrowLeft size={18} strokeWidth={2} aria-hidden />
                 Back to Login
               </button>
             </div>

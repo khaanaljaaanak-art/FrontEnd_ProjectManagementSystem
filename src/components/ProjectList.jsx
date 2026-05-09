@@ -69,17 +69,27 @@ const ProjectListBody = ({
   </>
 );
 
-const ProjectList = ({ selectable = false, selectedProjectId, onSelect, embedded = false, listId }) => {
+/** `suppressRefresh` hides the refresh control in both embedded and standalone layouts. */
+const ProjectList = ({
+  selectable = false,
+  selectedProjectId,
+  onSelect,
+  embedded = false,
+  suppressRefresh = false,
+  listId,
+}) => {
   const { projects, loading, error, refreshProjects } = useProjects();
 
   if (embedded) {
     return (
       <div className="studentSubmitProjectEmbed">
-        <div className="studentSubmitProjectEmbed__bar">
-          <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
-            {loading ? "Refreshing…" : "Refresh list"}
-          </button>
-        </div>
+        {!suppressRefresh ? (
+          <div className="studentSubmitProjectEmbed__bar">
+            <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
+              {loading ? "Refreshing…" : "Refresh list"}
+            </button>
+          </div>
+        ) : null}
         <ProjectListBody
           projects={projects}
           loading={loading}
@@ -95,7 +105,9 @@ const ProjectList = ({ selectable = false, selectedProjectId, onSelect, embedded
 
   return (
     <section className="card studentOverviewCard studentSubmitProjectPanel" aria-labelledby="submit-projects-heading">
-      <header className="studentOverviewCard__header studentOverviewCard__header--split">
+      <header
+        className={`studentOverviewCard__header${suppressRefresh ? "" : " studentOverviewCard__header--split"}`}
+      >
         <div>
           <p className="studentOverviewCard__eyebrow">Workspace</p>
           <h2 id="submit-projects-heading" className="cardTitle">
@@ -103,9 +115,11 @@ const ProjectList = ({ selectable = false, selectedProjectId, onSelect, embedded
           </h2>
           <p className="cardHint">Choose the project you are submitting work for. Assessments load after you select.</p>
         </div>
-        <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
-          {loading ? "Refreshing…" : "Refresh list"}
-        </button>
+        {!suppressRefresh ? (
+          <button type="button" className="button buttonRefresh" onClick={refreshProjects} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh list"}
+          </button>
+        ) : null}
       </header>
 
       <div className="studentOverviewCard__body">

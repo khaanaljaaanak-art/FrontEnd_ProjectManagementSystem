@@ -11,10 +11,11 @@ const AssessmentList = ({
   helper,
   className = "",
   selectId = "assessment-select",
+  visibleLabel = true,
 }) => {
   return (
     <div className={className || undefined}>
-      <label className="label" htmlFor={selectId}>
+      <label className={visibleLabel ? "label" : "srOnly"} htmlFor={selectId}>
         Assessment
       </label>
       <select
